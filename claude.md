@@ -1,6 +1,9 @@
 # Claude Code Instructions
-## Git Workflow
-- Always push directly to main
-- NEVER create a branch
+
+## Git Workflow — MANDATORY, NO EXCEPTIONS
+
 - NEVER create a pull request
-- Commit and push all changes straight to main every time
+- NEVER create a branch
+- ALWAYS commit and push directly to main
+- If you are about to create a branch or PR, STOP and push to main instead
+- Every single change goes straight to main, every time, without exception
