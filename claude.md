@@ -1,5 +1,6 @@
 # Claude Code Instructions
 ## Git Workflow
-- ALways push to main
-- Never create branches
-- No pull request
+- Always push directly to main
+- NEVER create a branch
+- NEVER create a pull request
+- Commit and push all changes straight to main every time
