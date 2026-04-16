@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="googlebot" content="noindex, nofollow">
-<title>IUOE Local 564 — Grievance Advisor</title>
+<title>IUOE Local 564 — Grievance-Arbitration Advisor</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -59,7 +59,7 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 #appScreen{display:none;}
 .page-header{background:linear-gradient(180deg,#0d1e3a 0%,var(–navy) 100%);border-bottom:1px solid var(–gold-dim);padding:16px 20px;text-align:center;}
 .switch-btn{display:block;margin:0 auto 10px auto;background:var(–navy-mid);border:1px solid rgba(201,168,76,0.4);color:var(–gold);padding:5px 14px;font-family:‘Montserrat’,sans-serif;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border-radius:6px;cursor:pointer;}
-.header-local{font-family:'Bebas Neue',sans-serif;font-size:clamp(13px,3.6vw,42px);letter-spacing:0.5px;color:#ffffff;font-weight:700;display:block;text-align:center;white-space:nowrap;overflow:hidden;margin:0 0 16px 0;padding:10px 0;line-height:1.2;}
+.header-local{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:3px;color:#ffffff;font-weight:700;display:block;text-align:center;white-space:nowrap;overflow:hidden;margin:0 0 16px 0;padding:10px 0;line-height:1.2;}
 .hero-logo{width:80px;height:80px;border-radius:50%;border:2px solid var(–gold-dim);margin:0 auto 10px;display:block;}
 .contract-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.3);border-radius:20px;padding:6px 14px;font-size:10px;font-weight:600;letter-spacing:0.5px;color:#2ecc71;margin-bottom:12px;}
 .contract-badge::before{content:“✓”;font-weight:700;}
@@ -152,7 +152,7 @@ body{background:#ffffff !important;}
 <div id="employerScreen">
   <img class="employer-logo" src="img/employer-logo.png" alt="IUOE Local 564">
   <div class="employer-title">IUOE LOCAL <span>564</span></div>
-  <div class="employer-subtitle">★ GRIEVANCE ADVISOR — MEMBERS ONLY ★</div>
+  <div class="employer-subtitle">★ GRIEVANCE-ARBITRATION ADVISOR — MEMBERS ONLY ★</div>
   <div class="employer-select-label">SELECT YOUR EMPLOYER CONTRACT</div>
   <select class="employer-dropdown" id="employerSelect">
     <option value="">— Select Employer —</option>
@@ -167,7 +167,7 @@ body{background:#ffffff !important;}
 <div id="pinScreen">
   <div class="pin-employer-label" id="pinEmployerLabel"></div>
   <img class="pin-bulldog" src="img/pin-bulldog.png" alt="IUOE Local 564">
-  <div class="pin-title">GRIEVANCE <span>ADVISOR</span></div>
+  <div class="pin-title">GRIEVANCE-ARBITRATION <span>ADVISOR</span></div>
   <div class="pin-subtitle">★ ENTER CONTRACT PIN TO ACCESS ★</div>
   <div class="pin-dots" id="pinDots">
     <div class="pin-dot" id="dot0"></div>
@@ -197,11 +197,11 @@ body{background:#ffffff !important;}
 
 <div id="appScreen">
   <div class="page-header">
-    <div class="header-local">&#9733; INTERNATIONAL UNION OF OPERATING ENGINEERS &#9733;</div>
+    <div class="header-local">&#9733; IUOE LOCAL 564 &#9733;</div>
     <button class="switch-btn" onclick="switchContract()">&#8644; Switch Contract</button>
     <img class="hero-logo" src="img/hero-logo.jpg" alt="IUOE Local 564">
     <div class="contract-badge" id="contractBadge"></div>
-    <div class="app-title">GRIEVANCE<br>ADVISOR</div>
+    <div class="app-title">GRIEVANCE-ARBITRATION<br>ADVISOR</div>
     <p class="app-subtitle">"Describe your situation in plain language — the AI reads your actual verbatim contract and builds your complete legal strategy."</p>
   </div>
   <div class="main-content">
@@ -373,7 +373,7 @@ function checkPin() {
         document.getElementById('pinScreen').style.display = 'none';
         document.getElementById('appScreen').style.display = 'block';
         document.getElementById('contractBadge').textContent = contract.badge;
-        document.getElementById('printContractName').textContent = 'AI-Powered Grievance Advisor · ' + contract.name;
+        document.getElementById('printContractName').textContent = 'AI-Powered Grievance-Arbitration Advisor · ' + contract.name;
         pinEntry = '';
         updateDots();
       })
@@ -697,7 +697,7 @@ function saveAnalysis() {
   var analysis = document.getElementById('resultsBody').innerText;
   var date = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   var content = 'IUOE LOCAL 564 — GRIEVANCE ANALYSIS\n';
-  content += 'AI-Powered Grievance Advisor — One Star Labor Solutions\n';
+  content += 'AI-Powered Grievance-Arbitration Advisor — One Star Labor Solutions\n';
   content += 'Employer: ' + currentContract.name + '\n';
   content += 'Generated: ' + date + '\n';
   content += '================================================\n\n' + analysis;
