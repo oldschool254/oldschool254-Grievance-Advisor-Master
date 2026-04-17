@@ -186,17 +186,17 @@ body{background:#ffffff !important;}
     <div class="pin-dot" id="dot3"></div>
   </div>
   <div class="pin-pad">
-    <button class="pin-btn" onclick="pinPress('1')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">1</button>
-    <button class="pin-btn" onclick="pinPress('2')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">2</button>
-    <button class="pin-btn" onclick="pinPress('3')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">3</button>
-    <button class="pin-btn" onclick="pinPress('4')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">4</button>
-    <button class="pin-btn" onclick="pinPress('5')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">5</button>
-    <button class="pin-btn" onclick="pinPress('6')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">6</button>
-    <button class="pin-btn" onclick="pinPress('7')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">7</button>
-    <button class="pin-btn" onclick="pinPress('8')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">8</button>
-    <button class="pin-btn" onclick="pinPress('9')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">9</button>
+    <button class="pin-btn" onclick="pinPress('1')" onmousedown="dtmfMouse('1')" ontouchstart="dtmfTouch('1'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')" onmousedown="dtmfMouse('2')" ontouchstart="dtmfTouch('2'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')" onmousedown="dtmfMouse('3')" ontouchstart="dtmfTouch('3'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')" onmousedown="dtmfMouse('4')" ontouchstart="dtmfTouch('4'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')" onmousedown="dtmfMouse('5')" ontouchstart="dtmfTouch('5'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')" onmousedown="dtmfMouse('6')" ontouchstart="dtmfTouch('6'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')" onmousedown="dtmfMouse('7')" ontouchstart="dtmfTouch('7'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')" onmousedown="dtmfMouse('8')" ontouchstart="dtmfTouch('8'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')" onmousedown="dtmfMouse('9')" ontouchstart="dtmfTouch('9'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">9</button>
     <div></div>
-    <button class="pin-btn" onclick="pinPress('0')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">0</button>
+    <button class="pin-btn" onclick="pinPress('0')" onmousedown="dtmfMouse('0')" ontouchstart="dtmfTouch('0'); this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">0</button>
     <button class="pin-del" onclick="pinDel()" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">&#9003;</button>
   </div>
   <div class="pin-error" id="pinError"></div>
@@ -294,6 +294,49 @@ body{background:#ffffff !important;}
 </div>
 
 <script>
+// =============================================
+// DTMF AUDIO
+// =============================================
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+var DTMF_FREQS = {
+  '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+  '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+  '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+  '0': [941, 1336]
+};
+var _dtmfFromTouch = false;
+
+function playDtmf(digit) {
+  audioCtx.resume().then(function() {
+    var freqs = DTMF_FREQS[digit];
+    if (!freqs) return;
+    var gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+    gain.connect(audioCtx.destination);
+    freqs.forEach(function(f) {
+      var osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+      osc.connect(gain);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.15);
+    });
+  });
+}
+
+function dtmfTouch(digit) {
+  _dtmfFromTouch = true;
+  setTimeout(function() { _dtmfFromTouch = false; }, 1000);
+  playDtmf(digit);
+}
+
+function dtmfMouse(digit) {
+  if (_dtmfFromTouch) return;
+  playDtmf(digit);
+}
+
 // =============================================
 // CONTRACTS DATABASE
 // Each contract has its own unique PIN
