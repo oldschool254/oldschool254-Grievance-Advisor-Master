@@ -47,8 +47,9 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(–gold);background:transparent;transition:background 0.15s;}
 .pin-dot.filled{background:var(–gold);}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;}
-.pin-btn{background:#040d1a;border:2px solid #c9a84c;border-radius:12px;color:#c9a84c;font-size:1.5rem;font-weight:700;padding:18px;cursor:pointer;transition:all 0.1s;-webkit-tap-highlight-color:rgba(201,168,76,0.5);}
-.pin-btn:active{background:#050e1e !important;color:#c9a84c !important;border-color:#c9a84c !important;transform:scale(0.93);box-shadow:inset 0 3px 8px rgba(0,0,0,0.6);}
+.pin-btn{background:#040d1a;background-color:#040d1a;border:2px solid #c9a84c;border-radius:12px;color:#c9a84c;-webkit-text-fill-color:#c9a84c;font-size:1.5rem;font-weight:700;padding:18px;cursor:pointer;transition:background-color 0.1s,color 0.1s,border-color 0.1s;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none;outline:none;}
+.pin-btn:hover{background:#0a1628;background-color:#0a1628;color:#c9a84c;-webkit-text-fill-color:#c9a84c;}
+.pin-btn:active{background:#c9a84c !important;background-color:#c9a84c !important;color:#040d1a !important;-webkit-text-fill-color:#040d1a !important;border-color:#c9a84c !important;transform:scale(0.93);box-shadow:inset 0 3px 8px rgba(0,0,0,0.4);}
 .pin-del{background:transparent;border:none;color:var(–gold);font-size:1.3rem;cursor:pointer;padding:18px;}
 .pin-error{color:var(–red);font-size:11px;letter-spacing:1px;margin-top:10px;min-height:16px;}
 .pin-back-btn{background:transparent;border:none;color:var(–dim);font-size:11px;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:‘Montserrat’,sans-serif;}
@@ -93,11 +94,14 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .results-footer{background:rgba(10,22,40,0.7);border:1px solid var(–gold-dim);border-top:none;border-radius:0 0 14px 14px;padding:14px 20px;}
 .disclaimer{font-size:10px;color:var(–dim);font-style:italic;max-width:520px;line-height:1.5;margin-bottom:10px;}
 .print-save-row{display:flex;gap:12px;margin:14px 0 6px 0;width:100%;}
-.btn-print{flex:1;padding:12px 8px;border-radius:8px;font-family:’Bebas Neue’,sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#0a1628;border:2px solid #c9a84c;color:#c9a84c;text-align:center;}
+.btn-print{flex:1;padding:12px 8px;border-radius:8px;font-family:’Bebas Neue’,sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#0a1628;background-color:#0a1628;border:2px solid #c9a84c;color:#c9a84c;-webkit-text-fill-color:#c9a84c;text-align:center;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;}
+.btn-print:active{background:#c9a84c !important;background-color:#c9a84c !important;color:#0a1628 !important;-webkit-text-fill-color:#0a1628 !important;border-color:#c9a84c !important;}
 .btn-save{flex:1;padding:12px 8px;border-radius:8px;font-family:’Bebas Neue’,sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#c9a84c;color:#0a1628;border:2px solid #c9a84c;text-align:center;}
-.btn-reset{background:#0a1628;border:1px solid #c9a84c;color:#c9a84c;padding:9px 18px;font-family:’Montserrat’,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;border-radius:6px;cursor:pointer;}
+.btn-reset{background:#0a1628;background-color:#0a1628;border:2px solid #c9a84c;color:#c9a84c;-webkit-text-fill-color:#c9a84c;padding:9px 18px;font-family:’Montserrat’,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;border-radius:6px;cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;}
+.btn-reset:active{background:#c9a84c !important;background-color:#c9a84c !important;color:#0a1628 !important;-webkit-text-fill-color:#0a1628 !important;border-color:#c9a84c !important;}
 .print-header{display:none;text-align:center;margin-bottom:20px;border-bottom:2px solid #000;padding-bottom:10px;}
-#buildFormBtn{width:100%;background:#0a1628;border:2px solid #c9a84c;color:#c9a84c;border-radius:10px;font-family:’Bebas Neue’,sans-serif;font-size:1.1rem;letter-spacing:2px;padding:13px;cursor:pointer;margin:16px 0;display:none;}
+#buildFormBtn{width:100%;background:#0a1628;background-color:#0a1628;border:2px solid #c9a84c;color:#c9a84c;-webkit-text-fill-color:#c9a84c;border-radius:10px;font-family:’Bebas Neue’,sans-serif;font-size:1.1rem;letter-spacing:2px;padding:13px;cursor:pointer;margin:16px 0;display:none;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;}
+#buildFormBtn:active{background:#c9a84c !important;background-color:#c9a84c !important;color:#0a1628 !important;-webkit-text-fill-color:#0a1628 !important;border-color:#c9a84c !important;}
 #grievanceFormSection{display:none;margin:24px 0;background:var(–navy-mid);border:1.5px solid var(–gold);border-radius:12px;padding:22px;}
 .gf-label{display:block;color:var(–gold);font-size:0.75rem;font-family:‘JetBrains Mono’,monospace;letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;}
 .gf-input{width:100%;background:#162840 !important;border:1px solid #2a4060;border-radius:8px;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;font-size:0.9rem;padding:10px 12px;box-sizing:border-box;margin-bottom:12px;-webkit-appearance:none;appearance:none;}
