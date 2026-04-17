@@ -186,17 +186,17 @@ body{background:#ffffff !important;}
     <div class="pin-dot" id="dot3"></div>
   </div>
   <div class="pin-pad">
-    <button class="pin-btn" onclick="pinPress('1')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">1</button>
-    <button class="pin-btn" onclick="pinPress('2')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">2</button>
-    <button class="pin-btn" onclick="pinPress('3')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">3</button>
-    <button class="pin-btn" onclick="pinPress('4')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">4</button>
-    <button class="pin-btn" onclick="pinPress('5')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">5</button>
-    <button class="pin-btn" onclick="pinPress('6')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">6</button>
-    <button class="pin-btn" onclick="pinPress('7')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">7</button>
-    <button class="pin-btn" onclick="pinPress('8')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">8</button>
-    <button class="pin-btn" onclick="pinPress('9')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">9</button>
+    <button class="pin-btn" onclick="pinPress('1')" ontouchstart="this.classList.add('active');playBeepOnTouch('1')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')" ontouchstart="this.classList.add('active');playBeepOnTouch('2')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')" ontouchstart="this.classList.add('active');playBeepOnTouch('3')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')" ontouchstart="this.classList.add('active');playBeepOnTouch('4')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')" ontouchstart="this.classList.add('active');playBeepOnTouch('5')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')" ontouchstart="this.classList.add('active');playBeepOnTouch('6')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')" ontouchstart="this.classList.add('active');playBeepOnTouch('7')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')" ontouchstart="this.classList.add('active');playBeepOnTouch('8')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')" ontouchstart="this.classList.add('active');playBeepOnTouch('9')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">9</button>
     <div></div>
-    <button class="pin-btn" onclick="pinPress('0')" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">0</button>
+    <button class="pin-btn" onclick="pinPress('0')" ontouchstart="this.classList.add('active');playBeepOnTouch('0')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">0</button>
     <button class="pin-del" onclick="pinDel()" ontouchstart="this.classList.add('active')" ontouchend="this.classList.remove('active')" ontouchcancel="this.classList.remove('active')">&#9003;</button>
   </div>
   <div class="pin-error" id="pinError"></div>
@@ -295,6 +295,57 @@ body{background:#ffffff !important;}
 
 <script>
 // =============================================
+// AUDIO SYSTEM — DUAL APPROACH
+// iOS Safari: base64 WAV via Audio element (called directly in ontouchstart)
+// Desktop/Android: Web Audio API with audioCtx.resume() before playing
+// =============================================
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+var IOS_BEEP = 'data:audio/wav;base64,UklGRtQEAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YbAEAACAv+LXpGErHDt5uuDaqmcvHDdztd/csG0yHDJtsNzftXM3HC9nqtrgunk7HCthpNfiv39AHShbntTjxIZFHyVVmNDjyIxKICNPks3kzZJPIyBKjMjj0JhVJR9FhsTj1J5bKB1AgL/i16RhKxw7ebrg2qpnLxw3c7Xf3LBtMhwybbDc37VzNxwvZ6ra4Lp5OxwrYaTX4r+AQB0oW57U48SGRR8lVZjQ48iMSiAjT5LN5M2STyMgSozI49CYVSUfRYbE49SeWygdQIC/4tekYSscO3m64NqqZy8cN3O139ywbTIcMm2w3N+1czccL2eq2uC6eTscK2Gk1+K/f0AdKFue1OPEhkUfJVWY0OPIjEogI0+SzeTNkk8jIEqMyOPQmFUlH0WGxOPUnlsoHUB/v+LXpGErHDt5uuDaqmcvHDdztd/csG0yHDJtsNzftXM3HC9nqtrgunk7HCthpNfiv39AHShbntTjxIZFHyVVmNDjyIxKICNPks3kzZJPIyBKjMjj0JhVJR9FhsTj1J5bKB1AgL/i16RhKxw7ebrg2qpnLxw3c7Xf3LBtMhwybbDc37VzNxwvZ6ra4Lp5OxwrYaTX4r9/QB0oW57U48SGRR8lVZjQ48iMSiAjT5LN5M2STyMgSozI49CYVSUfRYbE49SeWygdQIC/4tekYSscO3m64NqqZy8cN3O139ywbTIcMm2w3N+1czccL2eq2uC6eTscK2Gk1+K/f0AdKFue1OPEhkUfJVWY0OPIjEogI0+SzeTNkk8jIEqMyOPQmFUlH0WGxOPUnlsoHUB/v+LXpGErHDt5uuDaqmcvHDdztd/csG0yHDJtsNzftXM3HC9nqtrgunk7HCthpNfiv4BAHShbntTjxIZFHyVVmNDjyIxKICNPks3kzZJPIyBKjMjj0JhVJR9FhsTj1J5bKB1AgL/i16RhKxw7ebrg2qpnLxw3c7Xf3LBtMhwybbDc37VzNxwvZ6ra4Lp5OxwrYaTX4r9/QB0oW57U48SGRR8lVZjQ48iMSiAjT5LN5M2STyMgSozI49CYVSUfRYbE49SeWygdQIC/4tekYSscO3m64NqqZy8cN3O139ywbTIcMm2w3N+1czccL2eq2uC6eTscK2Gk1+K/f0AdKFue1OPEhkUfJVWY0OPIjEogI0+SzeTNkk8jIEqMyOPQmFUlH0WGxOPUnlsoHUCAv+LXpGErHDt5uuDaqmcvHDdztd/csG0yHDJtsNzftXM3HC9nqtrgunk7HCthpNfiv39AHShbntTjxIZFHyVVmNDjyIxKICNPks3kzZJPIyBKjMjj0JhVJR9FhsTj1J5bKB1AgL/i16RhKxw7ebrg2qpnLxw3c7Xf3LBtMhwybbDc37VzNxwvZ6ra4Lp5OxwrYaTX4r9/QB0oW57U48SGRR8lVZjQ48iMSiAjT5LN5M2STyMgSozI49CYVSUfRYbE49SeWygdQIC/4tekYSscO3m64NqqZy8cN3O139ywbTIcMm2w3N+1czccL2eq2uC6eTscK2Gk1+K/f0AdKFue1OPEhkUfJVWY0OPIjEogI0+SzeTNkk8jIEqMyOPQmFUlH0WGxOPUnlsoHUA=';
+
+var DTMF_FREQS = {
+  '0': [941, 1336], '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+  '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+  '7': [852, 1209], '8': [852, 1336], '9': [852, 1477]
+};
+
+var audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Called directly in ontouchstart — iOS requires play() inside the touch handler
+function playBeepOnTouch(digit) {
+  if (!isIOS) return;
+  var a = new Audio(IOS_BEEP);
+  a.play().catch(function(){});
+}
+
+// Called from pinPress() for desktop Chrome/Firefox/Edge and Android
+function playDTMF(digit) {
+  if (isIOS) return;
+  var ctx = getAudioCtx();
+  ctx.resume().then(function() {
+    var freqs = DTMF_FREQS[digit] || [941, 1336];
+    var now = ctx.currentTime;
+    freqs.forEach(function(f) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = f;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    });
+  });
+}
+
+// =============================================
 // CONTRACTS DATABASE
 // Each contract has its own unique PIN
 // Business Manager holds master PIN list
@@ -360,6 +411,7 @@ function updateDots() {
 
 function pinPress(num) {
   if (pinEntry.length >= 4) return;
+  playDTMF(num);
   pinEntry += num;
   updateDots();
   if (pinEntry.length === 4) setTimeout(checkPin, 120);
