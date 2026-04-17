@@ -350,6 +350,69 @@ function switchContract() {
 }
 
 // =============================================
+// KEYPAD TONES (Web Audio API — no audio file needed)
+// AudioContext is created lazily on first user gesture to satisfy
+// iOS Safari autoplay policy; subsequent calls reuse the same context.
+// =============================================
+var _audioCtx = null;
+
+function _getAudioCtx() {
+  if (!_audioCtx) {
+    try {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { /* audio not supported */ }
+  }
+  return _audioCtx;
+}
+
+// Resume a suspended context (required after iOS page-load gate).
+function _resumeCtx(ctx) {
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume();
+  }
+}
+
+// Play a short DTMF-style dual-tone beep.
+// freq1/freq2 are the two DTMF frequencies; duration is in seconds.
+function playKeyTone(freq1, freq2, duration) {
+  var ctx = _getAudioCtx();
+  if (!ctx) return;
+  _resumeCtx(ctx);
+  duration = duration || 0.08;
+  var now = ctx.currentTime;
+  var gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.18, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  gain.connect(ctx.destination);
+  [freq1, freq2].forEach(function(freq) {
+    var osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    osc.start(now);
+    osc.stop(now + duration);
+  });
+}
+
+// Standard DTMF frequencies for digits 0-9.
+var DTMF = {
+  '1':[697,1209],'2':[697,1336],'3':[697,1477],
+  '4':[770,1209],'5':[770,1336],'6':[770,1477],
+  '7':[852,1209],'8':[852,1336],'9':[852,1477],
+  '*':[941,1209],'0':[941,1336],'#':[941,1477]
+};
+
+function playPinTone(digit) {
+  var f = DTMF[digit] || [800, 1200];
+  playKeyTone(f[0], f[1], 0.08);
+}
+
+// Initialise (or resume) the AudioContext on the very first touch/click
+// anywhere on the page — satisfies iOS Safari's user-gesture requirement.
+document.addEventListener('touchstart', function() { _getAudioCtx(); }, { once: true, passive: true });
+document.addEventListener('mousedown',  function() { _getAudioCtx(); }, { once: true, passive: true });
+
+// =============================================
 // PIN SYSTEM
 // =============================================
 function updateDots() {
@@ -360,12 +423,14 @@ function updateDots() {
 
 function pinPress(num) {
   if (pinEntry.length >= 4) return;
+  playPinTone(num);
   pinEntry += num;
   updateDots();
   if (pinEntry.length === 4) setTimeout(checkPin, 120);
 }
 
 function pinDel() {
+  playKeyTone(800, 1000, 0.06);
   pinEntry = pinEntry.slice(0, -1);
   updateDots();
 }
