@@ -47,7 +47,6 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .pin-title{font-family:‘Bebas Neue’,sans-serif;font-size:2rem;letter-spacing:3px;color:var(–white);text-align:center;margin-bottom:2px;}
 .pin-title span{color:var(–gold);}
 .pin-subtitle{font-size:10px;letter-spacing:3px;color:var(–gold);text-align:center;margin-bottom:24px;font-weight:600;}
-.pin-dots{display:flex;gap:14px;margin-bottom:24px;}
 .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(–gold);background:transparent;transition:background 0.15s;}
 .pin-dot.filled{background:var(–gold);}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;}
@@ -59,8 +58,9 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .pin-del{background:transparent;border:none;color:var(–gold);font-size:1.3rem;cursor:pointer;padding:18px;touch-action:manipulation;}
 .pin-error{color:var(–red);font-size:11px;letter-spacing:1px;margin-top:10px;min-height:16px;}
 .pin-back-btn{background:transparent;border:none;color:var(–dim);font-size:11px;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:‘Montserrat’,sans-serif;}
+@-webkit-keyframes shake{0%,100%{-webkit-transform:translateX(0);transform:translateX(0)}15%{-webkit-transform:translateX(-10px);transform:translateX(-10px)}30%{-webkit-transform:translateX(10px);transform:translateX(10px)}45%{-webkit-transform:translateX(-8px);transform:translateX(-8px)}60%{-webkit-transform:translateX(8px);transform:translateX(8px)}75%{-webkit-transform:translateX(-5px);transform:translateX(-5px)}90%{-webkit-transform:translateX(5px);transform:translateX(5px)}}
 @keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-10px)}30%{transform:translateX(10px)}45%{transform:translateX(-8px)}60%{transform:translateX(8px)}75%{transform:translateX(-5px)}90%{transform:translateX(5px)}}
-.shake{animation:shake 0.5s cubic-bezier(.36,.07,.19,.97) both;will-change:transform;}
+.pin-dots{display:flex;gap:14px;margin-bottom:24px;will-change:transform;}
 
 /* APP SCREEN */
 #appScreen{display:none;}
@@ -446,18 +446,21 @@ function checkPin() {
         updateDots();
       });
   } else {
+    console.log('[PIN] Wrong PIN entered — triggering shake animation');
     document.getElementById('pinError').textContent = 'Incorrect PIN — Try again';
     pinEntry = '';
     updateDots();
     pinLocked = true;
     var dots = document.getElementById('pinDots');
-    dots.classList.remove('shake');
+    dots.style.animation = 'none';
     void dots.offsetWidth;
-    dots.classList.add('shake');
+    dots.style.animation = 'shake 0.5s ease both';
     setTimeout(function() {
-      dots.classList.remove('shake');
+      dots.style.animation = 'none';
+      pinEntry = '';
+      updateDots();
       pinLocked = false;
-    }, 500);
+    }, 520);
   }
 }
 
