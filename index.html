@@ -1015,6 +1015,11 @@ function ttsChunkText(text) {
 }
 
 function ttsStart() {
+  var allVoices = window.speechSynthesis.getVoices();
+  var davidVoice = allVoices.find(function(v){ return v.name.indexOf('David') !== -1; });
+  var markVoice  = allVoices.find(function(v){ return v.name.indexOf('Mark')  !== -1; });
+  var maleVoice  = davidVoice || markVoice;
+
   window.speechSynthesis.cancel();
   ttsActive = true;
 
@@ -1028,19 +1033,11 @@ function ttsStart() {
     if (!ttsActive || i >= chunks.length) { ttsResetUI(); return; }
     var u = new SpeechSynthesisUtterance(chunks[i]);
 
-    // Always call ttsPickVoice — it checks localStorage saved pref first, then platform chain.
-    // Do NOT read dropdown index here: index 0 defaults to first alphabetical voice (often
-    // female Zira) when voices haven't loaded yet, overriding the proper auto-detection.
-    var freshVoices = window.speechSynthesis.getVoices();
-    var voiceSel = document.getElementById('ttsVoiceSelect');
-    var freshVoice = ttsPickVoice(freshVoices);
-    if (freshVoice) {
-      u.voice = freshVoice;
-      // Sync dropdown to show which voice is actually speaking
-      var activeIdx = freshVoices.indexOf(freshVoice);
-      if (voiceSel && activeIdx >= 0) voiceSel.value = String(activeIdx);
+    if (maleVoice) {
+      u.voice = maleVoice;
     } else {
-      u.lang = 'en-US';
+      var freshVoice = ttsPickVoice(window.speechSynthesis.getVoices());
+      if (freshVoice) { u.voice = freshVoice; } else { u.lang = 'en-US'; }
     }
 
     u.rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
