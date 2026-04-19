@@ -151,7 +151,23 @@ body{background:#ffffff !important;}
 .print-header{display:block !important;}
 .grievance-input{background:#ffffff !important;background-color:#ffffff !important;color:#000000 !important;-webkit-text-fill-color:#000000 !important;border:1px solid #cccccc !important;}
 textarea{background:#ffffff !important;background-color:#ffffff !important;color:#000000 !important;-webkit-text-fill-color:#000000 !important;}
+.tts-row,.tts-panel{display:none !important;}
 }
+
+/* TTS READ ALOUD */
+.tts-row{display:flex;gap:10px;margin:14px 0 10px 0;flex-wrap:wrap;}
+.btn-tts-read{flex:1;padding:11px 8px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#0a1628;background-color:#0a1628;border:2px solid #c9a84c;color:#c9a84c;-webkit-text-fill-color:#c9a84c;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;touch-action:manipulation;}
+.btn-tts-read:active{background:#c9a84c !important;background-color:#c9a84c !important;color:#0a1628 !important;-webkit-text-fill-color:#0a1628 !important;}
+.btn-tts-stop{flex:1;padding:11px 8px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#c9a84c;background-color:#c9a84c;border:2px solid #c9a84c;color:#0a1628;-webkit-text-fill-color:#0a1628;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;touch-action:manipulation;}
+.btn-tts-settings{padding:11px 14px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:transparent;border:2px solid rgba(201,168,76,0.4);color:#c9a84c;-webkit-text-fill-color:#c9a84c;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;touch-action:manipulation;}
+.btn-tts-settings:active{background:rgba(201,168,76,0.15) !important;}
+.tts-panel{background:#0a1628;border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;padding:16px;margin-bottom:14px;}
+.tts-panel-row{margin-bottom:14px;}
+.tts-label{display:block;font-size:9px;letter-spacing:2px;color:#c9a84c;font-weight:700;margin-bottom:8px;font-family:'Montserrat',sans-serif;}
+.tts-select{width:100%;background:#0e1e38;border:1.5px solid rgba(201,168,76,0.3);border-radius:8px;color:#ffffff;font-size:13px;padding:10px 12px;font-family:'Montserrat',sans-serif;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;}
+.tts-select option,.tts-select optgroup{background:#0e1e38;color:#ffffff;}
+.tts-slider{width:100%;accent-color:#c9a84c;cursor:pointer;height:4px;margin-top:2px;}
+.tts-save-btn{width:100%;margin-top:6px;padding:12px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;background:#c9a84c;background-color:#c9a84c;border:2px solid #c9a84c;color:#0a1628;-webkit-text-fill-color:#0a1628;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
 </style>
 
 </head>
@@ -268,6 +284,30 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
         <div class="print-save-row">
           <button class="btn-print" onclick="printAnalysis()">&#128438; PRINT ANALYSIS</button>
           <button class="btn-save" onclick="saveAnalysis()">&#8681; SAVE AS PDF</button>
+        </div>
+        <div class="tts-row" id="ttsRow">
+          <button class="btn-tts-read" id="ttsReadBtn" onclick="ttsStart()">&#128266; READ ALOUD</button>
+          <button class="btn-tts-stop" id="ttsStopBtn" onclick="ttsStop()" style="display:none">&#9209; STOP</button>
+          <button class="btn-tts-settings" onclick="ttsToggleSettings()">&#9881; VOICE</button>
+        </div>
+        <div class="tts-panel" id="ttsPanel" style="display:none">
+          <div class="tts-panel-row">
+            <label class="tts-label">VOICE</label>
+            <select class="tts-select" id="ttsVoiceSelect"></select>
+          </div>
+          <div class="tts-panel-row">
+            <label class="tts-label">SPEED &mdash; <span id="ttsRateVal">1.0</span>x</label>
+            <input type="range" class="tts-slider" id="ttsRate" min="0.5" max="2" step="0.1" value="1" oninput="document.getElementById('ttsRateVal').textContent=parseFloat(this.value).toFixed(1)">
+          </div>
+          <div class="tts-panel-row">
+            <label class="tts-label">PITCH &mdash; <span id="ttsPitchVal">1.0</span></label>
+            <input type="range" class="tts-slider" id="ttsPitch" min="0" max="2" step="0.1" value="1" oninput="document.getElementById('ttsPitchVal').textContent=parseFloat(this.value).toFixed(1)">
+          </div>
+          <div class="tts-panel-row">
+            <label class="tts-label">VOLUME &mdash; <span id="ttsVolVal">100</span>%</label>
+            <input type="range" class="tts-slider" id="ttsVolume" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('ttsVolVal').textContent=Math.round(this.value*100)">
+          </div>
+          <button class="tts-save-btn" onclick="ttsSaveSettings()">&#128190; SAVE SETTINGS</button>
         </div>
         <div class="disclaimer">This AI-generated guidance is based on the full verbatim text of your CBA. Always consult your Union Steward or Business Agent before filing. For preparation purposes only.</div>
         <button class="btn-reset" onclick="resetForm()">New Grievance</button>
@@ -810,7 +850,145 @@ function resetForm() {
   document.getElementById('grievanceFormSection').style.display = 'none';
   hideError();
   conversationHistory = [];
+  ttsStop();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// =============================================
+// TEXT-TO-SPEECH — READ ALOUD
+// Web Speech API — iOS Safari, Android Chrome, desktop Chrome/Firefox/Edge
+// iOS: speak() called synchronously inside click handler (no async wrapper)
+// iOS 15+ bug: speechSynthesis stops after ~15s — keepalive timer workaround
+// =============================================
+var ttsVoices = [];
+var ttsKeepalive = null;
+
+function ttsGetVoices() {
+  if (!window.speechSynthesis) return;
+  ttsVoices = window.speechSynthesis.getVoices();
+}
+
+function ttsPopulateVoices() {
+  ttsGetVoices();
+  var sel = document.getElementById('ttsVoiceSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  if (ttsVoices.length === 0) {
+    var opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Default Voice';
+    sel.appendChild(opt);
+    return;
+  }
+  var groups = {};
+  ttsVoices.forEach(function(v, i) {
+    var lang = v.lang || 'Unknown';
+    if (!groups[lang]) groups[lang] = [];
+    groups[lang].push({v: v, i: i});
+  });
+  Object.keys(groups).sort().forEach(function(lang) {
+    var og = document.createElement('optgroup');
+    og.label = lang;
+    groups[lang].forEach(function(item) {
+      var opt = document.createElement('option');
+      opt.value = item.i;
+      opt.textContent = item.v.name + (item.v.default ? ' \u2605' : '');
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  var savedVoice = localStorage.getItem('tts_voice');
+  if (savedVoice) {
+    var idx = ttsVoices.findIndex(function(v) { return v.name === savedVoice; });
+    if (idx >= 0) sel.value = String(idx);
+  }
+}
+
+function ttsLoadSettings() {
+  var rate = localStorage.getItem('tts_rate');
+  var pitch = localStorage.getItem('tts_pitch');
+  var vol = localStorage.getItem('tts_volume');
+  if (rate) { document.getElementById('ttsRate').value = rate; document.getElementById('ttsRateVal').textContent = parseFloat(rate).toFixed(1); }
+  if (pitch) { document.getElementById('ttsPitch').value = pitch; document.getElementById('ttsPitchVal').textContent = parseFloat(pitch).toFixed(1); }
+  if (vol) { document.getElementById('ttsVolume').value = vol; document.getElementById('ttsVolVal').textContent = Math.round(parseFloat(vol) * 100); }
+}
+
+function ttsSaveSettings() {
+  var sel = document.getElementById('ttsVoiceSelect');
+  var idx = parseInt(sel.value);
+  if (!isNaN(idx) && ttsVoices[idx]) localStorage.setItem('tts_voice', ttsVoices[idx].name);
+  localStorage.setItem('tts_rate', document.getElementById('ttsRate').value);
+  localStorage.setItem('tts_pitch', document.getElementById('ttsPitch').value);
+  localStorage.setItem('tts_volume', document.getElementById('ttsVolume').value);
+  var btn = document.querySelector('.tts-save-btn');
+  btn.textContent = '\u2713 SAVED!';
+  setTimeout(function() { btn.innerHTML = '&#128190; SAVE SETTINGS'; }, 1500);
+}
+
+function ttsToggleSettings() {
+  var panel = document.getElementById('ttsPanel');
+  var opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if (opening) { ttsPopulateVoices(); ttsLoadSettings(); }
+}
+
+function ttsStart() {
+  if (!window.speechSynthesis) { alert('Read Aloud is not supported on this browser.'); return; }
+  window.speechSynthesis.cancel();
+  if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; }
+
+  var el = document.getElementById('resultsBody');
+  var text = (el ? (el.innerText || el.textContent || '') : '').trim();
+  if (!text) return;
+
+  var u = new SpeechSynthesisUtterance(text);
+
+  if (ttsVoices.length === 0) ttsGetVoices();
+  var sel = document.getElementById('ttsVoiceSelect');
+  var idx = sel ? parseInt(sel.value) : NaN;
+  if (!isNaN(idx) && ttsVoices[idx]) u.voice = ttsVoices[idx];
+
+  u.rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
+  u.pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
+  u.volume = parseFloat(document.getElementById('ttsVolume').value);
+  if (isNaN(u.volume)) u.volume = 1;
+
+  u.onend   = function() { ttsResetUI(); if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; } };
+  u.onerror = function() { ttsResetUI(); if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; } };
+
+  // iOS Safari: speechSynthesis silently stops after ~15s — pause/resume every 10s keeps it alive
+  ttsKeepalive = setInterval(function() {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    } else {
+      clearInterval(ttsKeepalive);
+      ttsKeepalive = null;
+    }
+  }, 10000);
+
+  // speak() called synchronously inside click handler — required for iOS autoplay policy
+  window.speechSynthesis.speak(u);
+  document.getElementById('ttsReadBtn').style.display = 'none';
+  document.getElementById('ttsStopBtn').style.display = '';
+}
+
+function ttsStop() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; }
+  ttsResetUI();
+}
+
+function ttsResetUI() {
+  var r = document.getElementById('ttsReadBtn');
+  var s = document.getElementById('ttsStopBtn');
+  if (r) r.style.display = '';
+  if (s) s.style.display = 'none';
+}
+
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = ttsPopulateVoices;
+  ttsGetVoices();
 }
 </script>
 
