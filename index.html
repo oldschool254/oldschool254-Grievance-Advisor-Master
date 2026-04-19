@@ -869,21 +869,24 @@ function ttsGetVoices() {
 }
 
 function ttsPickVoice(voices) {
+  // Windows: Settings → Time & Language → Speech → Add voices → install David/Mark Desktop
+  // Mac: System Preferences → Accessibility → Spoken Content → System Voice → Alex/Fred
   var savedName = localStorage.getItem('tts_voice');
   if (savedName) {
     var saved = voices.find(function(v) { return v.name === savedName; });
     if (saved) return saved;
   }
-  // Windows Desktop voices (most natural): Settings → Time & Language → Speech → Add voices
-  // Install "David Desktop" or "Mark Desktop" for best quality offline TTS on Windows.
-  // On Mac, System Preferences → Accessibility → Spoken Content → System Voice → Alex/Fred.
+  var femaleNames = ['female','samantha','victoria','karen','google us english'];
+  function isFemale(v) {
+    var n = v.name.toLowerCase();
+    return femaleNames.some(function(f) { return n.indexOf(f) >= 0; });
+  }
   var v;
-  v = voices.find(function(v) { return v.name === 'Microsoft David Desktop'; });           if (v) return v;
-  v = voices.find(function(v) { return v.name === 'Microsoft Mark Desktop'; });            if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('Microsoft Guy') >= 0; });           if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('David') >= 0; });                   if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('Mark') >= 0; });                    if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('Male') >= 0; });                    if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('david') >= 0; });     if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('mark') >= 0; });      if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('guy') >= 0; });       if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('james') >= 0; });     if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0 && !isFemale(v); }); if (v) return v;
   v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; });         if (v) return v;
   return null;
 }
@@ -896,26 +899,16 @@ function ttsPopulateVoices() {
   if (ttsVoices.length === 0) {
     var opt = document.createElement('option');
     opt.value = '';
-    opt.textContent = 'Default Voice';
+    opt.textContent = 'No voices found — check browser TTS settings';
     sel.appendChild(opt);
     return;
   }
-  var groups = {};
+  // Flat list — all voices, full name + language tag so user sees exactly what is available
   ttsVoices.forEach(function(v, i) {
-    var lang = v.lang || 'Unknown';
-    if (!groups[lang]) groups[lang] = [];
-    groups[lang].push({v: v, i: i});
-  });
-  Object.keys(groups).sort().forEach(function(lang) {
-    var og = document.createElement('optgroup');
-    og.label = lang;
-    groups[lang].forEach(function(item) {
-      var opt = document.createElement('option');
-      opt.value = item.i;
-      opt.textContent = item.v.name + (item.v.default ? ' \u2605' : '');
-      og.appendChild(opt);
-    });
-    sel.appendChild(og);
+    var opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + (v.lang || 'unknown') + ')' + (v.default ? ' \u2605' : '');
+    sel.appendChild(opt);
   });
   var bestVoice = ttsPickVoice(ttsVoices);
   if (bestVoice) {
