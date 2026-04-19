@@ -58,8 +58,6 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .pin-del{background:transparent;border:none;color:var(–gold);font-size:1.3rem;cursor:pointer;padding:18px;touch-action:manipulation;}
 .pin-error{color:var(–red);font-size:11px;letter-spacing:1px;margin-top:10px;min-height:16px;}
 .pin-back-btn{background:transparent;border:none;color:var(–dim);font-size:11px;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:‘Montserrat’,sans-serif;}
-@keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-8px)}20%,40%,60%,80%{transform:translateX(8px)}}
-.pin-shake{animation:shake 0.6s linear !important}
 .pin-dots{display:flex;gap:14px;margin-bottom:24px;}
 
 /* APP SCREEN */
@@ -446,29 +444,19 @@ function checkPin() {
         updateDots();
       });
   } else {
-    console.log('WRONG PIN DETECTED');
     document.getElementById('pinError').textContent = 'Incorrect PIN — Try again';
     pinLocked = true;
     var dots = document.getElementById('pinDots');
-    // RED BACKGROUND TEST — confirms wrong PIN branch is firing
-    dots.style.backgroundColor = 'red';
-    dots.style.borderRadius = '8px';
-    dots.style.padding = '8px';
+    var steps = [-10, 10, -8, 8, -6, 6, -4, 4, 0];
+    steps.forEach(function(x, i) {
+      setTimeout(function() { dots.style.transform = 'translateX(' + x + 'px)'; }, i * 60);
+    });
     setTimeout(function() {
-      dots.style.backgroundColor = '';
-      dots.style.borderRadius = '';
-      dots.style.padding = '';
-    }, 1000);
-    // shake
-    dots.classList.remove('pin-shake');
-    void dots.offsetWidth;
-    dots.classList.add('pin-shake');
-    setTimeout(function() {
-      dots.classList.remove('pin-shake');
+      dots.style.transform = '';
       pinEntry = '';
       updateDots();
       pinLocked = false;
-    }, 600);
+    }, steps.length * 60 + 20);
   }
 }
 
