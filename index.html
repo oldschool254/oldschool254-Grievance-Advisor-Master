@@ -1001,6 +1001,8 @@ function ttsChunkText(text) {
 }
 
 function ttsStart() {
+  console.log('READ ALOUD CLICKED');
+  console.log('ALL VOICES:', window.speechSynthesis.getVoices().map(function(v) { return v.name; }));
   window.speechSynthesis.cancel();
   ttsActive = true;
 
