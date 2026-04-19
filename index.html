@@ -447,21 +447,7 @@ function checkPin() {
     document.getElementById('pinError').textContent = 'Incorrect PIN — Try again';
     pinLocked = true;
     var dots = document.getElementById('pinDots');
-    dots.style.left = '-10px';
-    setTimeout(function() { dots.style.left = '10px'; },  60);
-    setTimeout(function() { dots.style.left = '-8px'; },  120);
-    setTimeout(function() { dots.style.left = '8px'; },   180);
-    setTimeout(function() { dots.style.left = '-6px'; },  240);
-    setTimeout(function() { dots.style.left = '6px'; },   300);
-    setTimeout(function() { dots.style.left = '-4px'; },  360);
-    setTimeout(function() { dots.style.left = '4px'; },   420);
-    setTimeout(function() { dots.style.left = '0px'; },   480);
-    setTimeout(function() {
-      dots.style.left = '';
-      pinEntry = '';
-      updateDots();
-      pinLocked = false;
-    }, 560);
+    dots.style.left = '-50px';
   }
 }
 
