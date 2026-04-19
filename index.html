@@ -866,6 +866,8 @@ var ttsActive = false;
 var ttsMobile  = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var ttsIOS     = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 var ttsAndroid = /Android/i.test(navigator.userAgent);
+var ttsMac     = !ttsMobile && /Mac/i.test(navigator.platform || navigator.userAgent);
+var ttsWindows = !ttsMobile && /Win/i.test(navigator.platform || navigator.userAgent);
 
 function ttsGetVoices() {
   if (!window.speechSynthesis) return;
@@ -873,10 +875,10 @@ function ttsGetVoices() {
 }
 
 function ttsPickVoice(voices) {
-  // Desktop: Settings → Time & Language → Speech → Add voices → install David/Mark Desktop
-  // Mac:     System Preferences → Accessibility → Spoken Content → System Voice → Alex/Fred
-  // iOS:     Settings → Accessibility → Spoken Content → Voices → English → download Aaron/Rishi
+  // iOS:     Settings → Accessibility → Spoken Content → Voices → English → download extras
   // Android: Settings → Accessibility → Text-to-speech → install Google Text-to-speech engine
+  // Windows: Settings → Time & Language → Speech → Add voices → install David/Mark Desktop
+  // Mac:     System Preferences → Accessibility → Spoken Content → System Voice → Alex/Tom
 
   // Always honour explicit saved preference first
   var savedName = localStorage.getItem('tts_voice');
@@ -885,36 +887,43 @@ function ttsPickVoice(voices) {
     if (saved) return saved;
   }
 
-  var femaleNames = ['female','samantha','victoria','karen','google us english'];
-  function isFemale(v) {
-    var n = v.name.toLowerCase();
-    return femaleNames.some(function(f) { return n.indexOf(f) >= 0; });
-  }
+  function byName(n) { return voices.find(function(v) { return v.name === n; }) || null; }
+  function contains(s) { return voices.find(function(v) { return v.name.toLowerCase().indexOf(s.toLowerCase()) >= 0; }) || null; }
 
   var v;
   if (ttsIOS) {
-    // iOS natural male voices — download extras via Settings → Accessibility → Spoken Content
-    v = voices.find(function(v) { return v.name === 'Aaron'; });                             if (v) return v;
-    v = voices.find(function(v) { return v.name === 'Fred'; });                              if (v) return v;
-    v = voices.find(function(v) { return v.name === 'Rishi'; });                             if (v) return v;
-    v = voices.find(function(v) { return v.name === 'Daniel'; });                            if (v) return v;
+    // iOS — Samantha is the best built-in natural voice; extras downloadable in Accessibility
+    v = byName('Samantha');                                                                   if (v) return v;
+    v = byName('Aaron');                                                                      if (v) return v;
+    v = byName('Fred');                                                                       if (v) return v;
+    v = byName('Rishi');                                                                      if (v) return v;
+    v = byName('Daniel');                                                                     if (v) return v;
   } else if (ttsAndroid) {
-    // Android — Google TTS engine male voices
-    v = voices.find(function(v) { return v.name === 'Google UK English Male'; });            if (v) return v;
-    v = voices.find(function(v) { return v.name === 'Google US English Male'; });            if (v) return v;
-  } else {
-    // Desktop — prefer high-quality offline Windows voices
-    v = voices.find(function(v) { return v.name === 'Microsoft David Desktop'; });          if (v) return v;
-    v = voices.find(function(v) { return v.name === 'Microsoft Mark Desktop'; });           if (v) return v;
-    v = voices.find(function(v) { return v.name.indexOf('Microsoft Guy') >= 0; });          if (v) return v;
+    // Android — Google TTS voices
+    v = byName('Google US English');                                                          if (v) return v;
+    v = byName('Google UK English Male');                                                     if (v) return v;
+    v = byName('Google US English Male');                                                     if (v) return v;
+    v = contains('Google');                                                                   if (v) return v;
+  } else if (ttsWindows) {
+    // Windows — prefer Desktop quality offline voices
+    v = byName('Microsoft David Desktop');                                                    if (v) return v;
+    v = byName('Microsoft David');                                                            if (v) return v;
+    v = byName('Microsoft Mark Desktop');                                                     if (v) return v;
+    v = byName('Microsoft Mark');                                                             if (v) return v;
+    v = contains('Microsoft Guy');                                                            if (v) return v;
+  } else if (ttsMac) {
+    // Mac — Alex is highest quality built-in; extras via Accessibility prefs
+    v = byName('Alex');                                                                       if (v) return v;
+    v = byName('Tom');                                                                        if (v) return v;
+    v = byName('Daniel');                                                                     if (v) return v;
   }
-  // Cross-platform fallback chain
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('david') >= 0; });      if (v) return v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('mark') >= 0; });       if (v) return v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('guy') >= 0; });        if (v) return v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('james') >= 0; });      if (v) return v;
-  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en') >= 0 && !isFemale(v); }); if (v) return v;
-  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en') >= 0; });             if (v) return v;
+  // Universal fallback chain
+  v = contains('david');                                                                      if (v) return v;
+  v = contains('mark');                                                                       if (v) return v;
+  v = contains('guy');                                                                        if (v) return v;
+  v = contains('james');                                                                      if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; });           if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en') >= 0; });              if (v) return v;
   return null;
 }
 
