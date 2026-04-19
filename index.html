@@ -308,6 +308,7 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
             <input type="range" class="tts-slider" id="ttsVolume" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('ttsVolVal').textContent=Math.round(this.value*100)">
           </div>
           <button class="tts-save-btn" onclick="ttsSaveSettings()">&#128190; SAVE SETTINGS</button>
+          <div id="ttsMobileNote" style="display:none;margin-top:10px;font-size:10px;color:rgba(255,255,255,0.5);line-height:1.5;font-family:'Montserrat',sans-serif;">&#128241; Voice quality depends on your device. For better voices go to your device <strong style="color:rgba(201,168,76,0.8)">Accessibility settings</strong> and download additional English voices.</div>
         </div>
         <div class="disclaimer">This AI-generated guidance is based on the full verbatim text of your CBA. Always consult your Union Steward or Business Agent before filing. For preparation purposes only.</div>
         <button class="btn-reset" onclick="resetForm()">New Grievance</button>
@@ -862,6 +863,9 @@ function resetForm() {
 // =============================================
 var ttsVoices = [];
 var ttsActive = false;
+var ttsMobile  = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+var ttsIOS     = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+var ttsAndroid = /Android/i.test(navigator.userAgent);
 
 function ttsGetVoices() {
   if (!window.speechSynthesis) return;
@@ -869,25 +873,48 @@ function ttsGetVoices() {
 }
 
 function ttsPickVoice(voices) {
-  // Windows: Settings → Time & Language → Speech → Add voices → install David/Mark Desktop
-  // Mac: System Preferences → Accessibility → Spoken Content → System Voice → Alex/Fred
+  // Desktop: Settings → Time & Language → Speech → Add voices → install David/Mark Desktop
+  // Mac:     System Preferences → Accessibility → Spoken Content → System Voice → Alex/Fred
+  // iOS:     Settings → Accessibility → Spoken Content → Voices → English → download Aaron/Rishi
+  // Android: Settings → Accessibility → Text-to-speech → install Google Text-to-speech engine
+
+  // Always honour explicit saved preference first
   var savedName = localStorage.getItem('tts_voice');
   if (savedName) {
     var saved = voices.find(function(v) { return v.name === savedName; });
     if (saved) return saved;
   }
+
   var femaleNames = ['female','samantha','victoria','karen','google us english'];
   function isFemale(v) {
     var n = v.name.toLowerCase();
     return femaleNames.some(function(f) { return n.indexOf(f) >= 0; });
   }
+
   var v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('david') >= 0; });     if (v) return v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('mark') >= 0; });      if (v) return v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('guy') >= 0; });       if (v) return v;
-  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('james') >= 0; });     if (v) return v;
-  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0 && !isFemale(v); }); if (v) return v;
-  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; });         if (v) return v;
+  if (ttsIOS) {
+    // iOS natural male voices — download extras via Settings → Accessibility → Spoken Content
+    v = voices.find(function(v) { return v.name === 'Aaron'; });                             if (v) return v;
+    v = voices.find(function(v) { return v.name === 'Fred'; });                              if (v) return v;
+    v = voices.find(function(v) { return v.name === 'Rishi'; });                             if (v) return v;
+    v = voices.find(function(v) { return v.name === 'Daniel'; });                            if (v) return v;
+  } else if (ttsAndroid) {
+    // Android — Google TTS engine male voices
+    v = voices.find(function(v) { return v.name === 'Google UK English Male'; });            if (v) return v;
+    v = voices.find(function(v) { return v.name === 'Google US English Male'; });            if (v) return v;
+  } else {
+    // Desktop — prefer high-quality offline Windows voices
+    v = voices.find(function(v) { return v.name === 'Microsoft David Desktop'; });          if (v) return v;
+    v = voices.find(function(v) { return v.name === 'Microsoft Mark Desktop'; });           if (v) return v;
+    v = voices.find(function(v) { return v.name.indexOf('Microsoft Guy') >= 0; });          if (v) return v;
+  }
+  // Cross-platform fallback chain
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('david') >= 0; });      if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('mark') >= 0; });       if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('guy') >= 0; });        if (v) return v;
+  v = voices.find(function(v) { return v.name.toLowerCase().indexOf('james') >= 0; });      if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en') >= 0 && !isFemale(v); }); if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en') >= 0; });             if (v) return v;
   return null;
 }
 
@@ -942,7 +969,12 @@ function ttsToggleSettings() {
   var panel = document.getElementById('ttsPanel');
   var opening = panel.style.display === 'none';
   panel.style.display = opening ? 'block' : 'none';
-  if (opening) { ttsPopulateVoices(); ttsLoadSettings(); }
+  if (opening) {
+    ttsPopulateVoices();
+    ttsLoadSettings();
+    var note = document.getElementById('ttsMobileNote');
+    if (note) note.style.display = ttsMobile ? 'block' : 'none';
+  }
 }
 
 function ttsChunkText(text) {
