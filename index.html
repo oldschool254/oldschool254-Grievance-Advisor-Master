@@ -874,12 +874,17 @@ function ttsPickVoice(voices) {
     var saved = voices.find(function(v) { return v.name === savedName; });
     if (saved) return saved;
   }
+  // Windows Desktop voices (most natural): Settings → Time & Language → Speech → Add voices
+  // Install "David Desktop" or "Mark Desktop" for best quality offline TTS on Windows.
+  // On Mac, System Preferences → Accessibility → Spoken Content → System Voice → Alex/Fred.
   var v;
-  v = voices.find(function(v) { return v.name === 'Google US English'; });            if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('Microsoft David') >= 0; });    if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('Microsoft Guy') >= 0; });      if (v) return v;
-  v = voices.find(function(v) { return v.name.indexOf('Male') >= 0; });               if (v) return v;
-  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; });    if (v) return v;
+  v = voices.find(function(v) { return v.name === 'Microsoft David Desktop'; });           if (v) return v;
+  v = voices.find(function(v) { return v.name === 'Microsoft Mark Desktop'; });            if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('Microsoft Guy') >= 0; });           if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('David') >= 0; });                   if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('Mark') >= 0; });                    if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('Male') >= 0; });                    if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; });         if (v) return v;
   return null;
 }
 
