@@ -905,11 +905,9 @@ function ttsPickVoice(voices) {
     v = byName('Google US English Male');                                                     if (v) return v;
     v = contains('Google');                                                                   if (v) return v;
   } else if (ttsWindows) {
-    // Windows — prefer Desktop quality offline voices
-    v = byName('Microsoft David Desktop');                                                    if (v) return v;
-    v = byName('Microsoft David');                                                            if (v) return v;
-    v = byName('Microsoft Mark Desktop');                                                     if (v) return v;
-    v = byName('Microsoft Mark');                                                             if (v) return v;
+    // Windows — contains() handles full names like "Microsoft David - English (United States)"
+    v = contains('Microsoft David');                                                          if (v) return v;
+    v = contains('Microsoft Mark');                                                           if (v) return v;
     v = contains('Microsoft Guy');                                                            if (v) return v;
   } else if (ttsMac) {
     // Mac — Alex is highest quality built-in; extras via Accessibility prefs
@@ -1016,14 +1014,15 @@ function ttsStart() {
     if (!ttsActive || i >= chunks.length) { ttsResetUI(); return; }
     var u = new SpeechSynthesisUtterance(chunks[i]);
 
-    // Read voice, rate, pitch, volume fresh every chunk so live changes apply immediately
+    // Always call ttsPickVoice — it checks localStorage saved pref first, then platform chain.
+    // Do NOT read dropdown index here: index 0 defaults to first alphabetical voice (often
+    // female Zira) when voices haven't loaded yet, overriding the proper auto-detection.
     var freshVoices = window.speechSynthesis.getVoices();
     var voiceSel = document.getElementById('ttsVoiceSelect');
-    var selIdx = voiceSel ? parseInt(voiceSel.value) : NaN;
-    var freshVoice = (!isNaN(selIdx) && freshVoices[selIdx]) ? freshVoices[selIdx] : ttsPickVoice(freshVoices);
+    var freshVoice = ttsPickVoice(freshVoices);
     if (freshVoice) {
       u.voice = freshVoice;
-      // Sync dropdown to show the active voice name
+      // Sync dropdown to show which voice is actually speaking
       var activeIdx = freshVoices.indexOf(freshVoice);
       if (voiceSel && activeIdx >= 0) voiceSel.value = String(activeIdx);
     } else {
