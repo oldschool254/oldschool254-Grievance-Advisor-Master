@@ -934,11 +934,42 @@ function ttsToggleSettings() {
 
 function ttsStart() {
   window.speechSynthesis.cancel();
-  var u = new SpeechSynthesisUtterance('Hello this is a test');
-  u.lang = 'en-US';
-  u.onstart = function() { console.log('SPEECH STARTED'); };
-  u.onerror = function(e) { console.log('SPEECH ERROR', e.error); };
+
+  var el = document.getElementById('resultsBody');
+  var text = (el ? (el.innerText || el.textContent || '') : '').trim();
+  if (!text) return;
+
+  var voices = window.speechSynthesis.getVoices();
+  var u = new SpeechSynthesisUtterance(text);
+
+  var savedName = localStorage.getItem('tts_voice');
+  var voice = null;
+  if (savedName) voice = voices.find(function(v) { return v.name === savedName; }) || null;
+  if (!voice)    voice = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; }) || null;
+  if (voice) u.voice = voice;
+  else u.lang = 'en-US';
+
+  u.rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
+  u.pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
+  u.volume = parseFloat(document.getElementById('ttsVolume').value);
+  if (isNaN(u.volume)) u.volume = 1;
+
+  u.onend   = function() { if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; } ttsResetUI(); };
+  u.onerror = function() { if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; } ttsResetUI(); };
+
   window.speechSynthesis.speak(u);
+
+  if (ttsKeepalive) clearInterval(ttsKeepalive);
+  ttsKeepalive = setInterval(function() {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    } else {
+      clearInterval(ttsKeepalive);
+      ttsKeepalive = null;
+    }
+  }, 10000);
+
   document.getElementById('ttsReadBtn').style.display = 'none';
   document.getElementById('ttsStopBtn').style.display = '';
 }
