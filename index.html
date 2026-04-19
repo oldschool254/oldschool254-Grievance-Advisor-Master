@@ -167,7 +167,8 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
 .tts-select{width:100%;background:#0e1e38;border:1.5px solid rgba(201,168,76,0.3);border-radius:8px;color:#ffffff;font-size:13px;padding:10px 12px;font-family:'Montserrat',sans-serif;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;}
 .tts-select option,.tts-select optgroup{background:#0e1e38;color:#ffffff;}
 .tts-slider{width:100%;accent-color:#c9a84c;cursor:pointer;height:4px;margin-top:2px;}
-.tts-save-btn{width:100%;margin-top:6px;padding:12px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;background:#c9a84c;background-color:#c9a84c;border:2px solid #c9a84c;color:#0a1628;-webkit-text-fill-color:#0a1628;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
+.tts-save-btn{flex:1;margin-top:6px;padding:12px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;background:#c9a84c;background-color:#c9a84c;border:2px solid #c9a84c;color:#0a1628;-webkit-text-fill-color:#0a1628;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
+.tts-reset-btn{flex:1;margin-top:6px;padding:12px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;background:transparent;border:2px solid rgba(201,168,76,0.5);color:#c9a84c;-webkit-text-fill-color:#c9a84c;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
 </style>
 
 </head>
@@ -286,7 +287,7 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
           <button class="btn-save" onclick="saveAnalysis()">&#8681; SAVE AS PDF</button>
         </div>
         <div class="tts-row" id="ttsRow">
-          <button class="btn-tts-read" id="ttsReadBtn" onclick="console.log('BTN ONCLICK FIRED'); ttsStart()">&#128266; READ ALOUD</button>
+          <button class="btn-tts-read" id="ttsReadBtn" onclick="ttsStart()">&#128266; READ ALOUD</button>
           <button class="btn-tts-stop" id="ttsStopBtn" onclick="ttsStop()" style="display:none">&#9209; STOP</button>
           <button class="btn-tts-settings" onclick="ttsToggleSettings()">&#9881; VOICE</button>
         </div>
@@ -307,7 +308,10 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
             <label class="tts-label">VOLUME &mdash; <span id="ttsVolVal">100</span>%</label>
             <input type="range" class="tts-slider" id="ttsVolume" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('ttsVolVal').textContent=Math.round(this.value*100)">
           </div>
-          <button class="tts-save-btn" onclick="ttsSaveSettings()">&#128190; SAVE SETTINGS</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="tts-save-btn" onclick="ttsSaveSettings()">&#128190; SAVE SETTINGS</button>
+            <button class="tts-reset-btn" onclick="ttsResetVoice()">&#8635; RESET VOICE</button>
+          </div>
           <div id="ttsMobileNote" style="display:none;margin-top:10px;font-size:10px;color:rgba(255,255,255,0.5);line-height:1.5;font-family:'Montserrat',sans-serif;">&#128241; Voice quality depends on your device. For better voices go to your device <strong style="color:rgba(201,168,76,0.8)">Accessibility settings</strong> and download additional English voices.</div>
         </div>
         <div class="disclaimer">This AI-generated guidance is based on the full verbatim text of your CBA. Always consult your Union Steward or Business Agent before filing. For preparation purposes only.</div>
@@ -335,7 +339,6 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
 </div>
 
 <script>
-window.onerror = function(msg, src, line) { console.log('JS ERROR:', msg, 'line', line); };
 // =============================================
 // AUDIO SYSTEM — DUAL APPROACH
 // iOS Safari: base64 WAV via Audio element (called directly in ontouchstart)
@@ -881,11 +884,14 @@ function ttsPickVoice(voices) {
   // Windows: Settings → Time & Language → Speech → Add voices → install David/Mark Desktop
   // Mac:     System Preferences → Accessibility → Spoken Content → System Voice → Alex/Tom
 
-  // Always honour explicit saved preference first
+  // Honour saved preference unless it's a known-female voice on Windows
   var savedName = localStorage.getItem('tts_voice');
   if (savedName) {
-    var saved = voices.find(function(v) { return v.name === savedName; });
-    if (saved) return saved;
+    var isSavedFemaleOnWindows = ttsWindows && /zira|hazel|heather|linda|susan|aria|cortana/i.test(savedName);
+    if (!isSavedFemaleOnWindows) {
+      var saved = voices.find(function(v) { return v.name === savedName; });
+      if (saved) return saved;
+    }
   }
 
   function byName(n) { return voices.find(function(v) { return v.name === n; }) || null; }
@@ -973,6 +979,13 @@ function ttsSaveSettings() {
   setTimeout(function() { btn.innerHTML = '&#128190; SAVE SETTINGS'; }, 1500);
 }
 
+function ttsResetVoice() {
+  localStorage.removeItem('tts_voice');
+  ttsPopulateVoices();
+  var btn = document.querySelector('.tts-reset-btn');
+  if (btn) { btn.textContent = '\u2713 RESET!'; setTimeout(function() { btn.textContent = '\u21BA RESET VOICE'; }, 1500); }
+}
+
 function ttsToggleSettings() {
   var panel = document.getElementById('ttsPanel');
   var opening = panel.style.display === 'none';
@@ -1002,8 +1015,6 @@ function ttsChunkText(text) {
 }
 
 function ttsStart() {
-  console.log('READ ALOUD CLICKED');
-  console.log('ALL VOICES:', window.speechSynthesis.getVoices().map(function(v) { return v.name; }));
   window.speechSynthesis.cancel();
   ttsActive = true;
 
