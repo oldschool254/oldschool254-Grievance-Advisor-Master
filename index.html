@@ -286,7 +286,7 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
           <button class="btn-save" onclick="saveAnalysis()">&#8681; SAVE AS PDF</button>
         </div>
         <div class="tts-row" id="ttsRow">
-          <button class="btn-tts-read" id="ttsReadBtn" onclick="ttsStart()">&#128266; READ ALOUD</button>
+          <button class="btn-tts-read" id="ttsReadBtn" onclick="console.log('BTN ONCLICK FIRED'); ttsStart()">&#128266; READ ALOUD</button>
           <button class="btn-tts-stop" id="ttsStopBtn" onclick="ttsStop()" style="display:none">&#9209; STOP</button>
           <button class="btn-tts-settings" onclick="ttsToggleSettings()">&#9881; VOICE</button>
         </div>
@@ -335,6 +335,7 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
 </div>
 
 <script>
+window.onerror = function(msg, src, line) { console.log('JS ERROR:', msg, 'line', line); };
 // =============================================
 // AUDIO SYSTEM — DUAL APPROACH
 // iOS Safari: base64 WAV via Audio element (called directly in ontouchstart)
