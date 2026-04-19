@@ -447,8 +447,7 @@ function checkPin() {
     document.getElementById('pinError').textContent = 'Incorrect PIN — Try again';
     pinLocked = true;
     var dots = document.getElementById('pinDots');
-    dots.style.transition = 'transform 0.06s ease';
-    setTimeout(function() { dots.style.transform = 'translateX(-10px)'; }, 0);
+    dots.style.transform = 'translateX(-10px)';
     setTimeout(function() { dots.style.transform = 'translateX(10px)'; },  60);
     setTimeout(function() { dots.style.transform = 'translateX(-8px)'; },  120);
     setTimeout(function() { dots.style.transform = 'translateX(8px)'; },   180);
@@ -458,7 +457,6 @@ function checkPin() {
     setTimeout(function() { dots.style.transform = 'translateX(4px)'; },   420);
     setTimeout(function() { dots.style.transform = 'translateX(0px)'; },   480);
     setTimeout(function() {
-      dots.style.transition = '';
       dots.style.transform = '';
       pinEntry = '';
       updateDots();
