@@ -868,6 +868,21 @@ function ttsGetVoices() {
   ttsVoices = window.speechSynthesis.getVoices();
 }
 
+function ttsPickVoice(voices) {
+  var savedName = localStorage.getItem('tts_voice');
+  if (savedName) {
+    var saved = voices.find(function(v) { return v.name === savedName; });
+    if (saved) return saved;
+  }
+  var v;
+  v = voices.find(function(v) { return v.name === 'Google US English'; });            if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('Microsoft David') >= 0; });    if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('Microsoft Guy') >= 0; });      if (v) return v;
+  v = voices.find(function(v) { return v.name.indexOf('Male') >= 0; });               if (v) return v;
+  v = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; });    if (v) return v;
+  return null;
+}
+
 function ttsPopulateVoices() {
   ttsGetVoices();
   var sel = document.getElementById('ttsVoiceSelect');
@@ -897,10 +912,10 @@ function ttsPopulateVoices() {
     });
     sel.appendChild(og);
   });
-  var savedVoice = localStorage.getItem('tts_voice');
-  if (savedVoice) {
-    var idx = ttsVoices.findIndex(function(v) { return v.name === savedVoice; });
-    if (idx >= 0) sel.value = String(idx);
+  var bestVoice = ttsPickVoice(ttsVoices);
+  if (bestVoice) {
+    var bestIdx = ttsVoices.indexOf(bestVoice);
+    if (bestIdx >= 0) sel.value = String(bestIdx);
   }
 }
 
@@ -962,18 +977,19 @@ function ttsStart() {
     if (!ttsActive || i >= chunks.length) { ttsResetUI(); return; }
     var u = new SpeechSynthesisUtterance(chunks[i]);
 
-    // Read voice, rate, pitch, volume fresh every chunk so live slider changes apply immediately
+    // Read voice, rate, pitch, volume fresh every chunk so live changes apply immediately
     var freshVoices = window.speechSynthesis.getVoices();
-    var sel = document.getElementById('ttsVoiceSelect');
-    var selIdx = sel ? parseInt(sel.value) : NaN;
-    var freshVoice = null;
-    if (!isNaN(selIdx) && freshVoices[selIdx]) freshVoice = freshVoices[selIdx];
-    if (!freshVoice) {
-      var savedName = localStorage.getItem('tts_voice');
-      if (savedName) freshVoice = freshVoices.find(function(v) { return v.name === savedName; }) || null;
+    var voiceSel = document.getElementById('ttsVoiceSelect');
+    var selIdx = voiceSel ? parseInt(voiceSel.value) : NaN;
+    var freshVoice = (!isNaN(selIdx) && freshVoices[selIdx]) ? freshVoices[selIdx] : ttsPickVoice(freshVoices);
+    if (freshVoice) {
+      u.voice = freshVoice;
+      // Sync dropdown to show the active voice name
+      var activeIdx = freshVoices.indexOf(freshVoice);
+      if (voiceSel && activeIdx >= 0) voiceSel.value = String(activeIdx);
+    } else {
+      u.lang = 'en-US';
     }
-    if (!freshVoice) freshVoice = freshVoices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; }) || null;
-    if (freshVoice) u.voice = freshVoice; else u.lang = 'en-US';
 
     u.rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
     u.pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
