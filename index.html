@@ -956,24 +956,30 @@ function ttsStart() {
   var text = (el ? el.innerText || el.textContent || '' : '').trim();
   if (!text) return;
 
-  var voices = window.speechSynthesis.getVoices();
-  var savedName = localStorage.getItem('tts_voice');
-  var voice = null;
-  if (savedName) voice = voices.find(function(v) { return v.name === savedName; }) || null;
-  if (!voice)    voice = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; }) || null;
-
-  var rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
-  var pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
-  var volume = parseFloat(document.getElementById('ttsVolume').value);
-  if (isNaN(volume)) volume = 1;
-
   var chunks = ttsChunkText(text);
 
   function speakChunk(i) {
     if (!ttsActive || i >= chunks.length) { ttsResetUI(); return; }
     var u = new SpeechSynthesisUtterance(chunks[i]);
-    if (voice) u.voice = voice; else u.lang = 'en-US';
-    u.rate = rate; u.pitch = pitch; u.volume = volume;
+
+    // Read voice, rate, pitch, volume fresh every chunk so live slider changes apply immediately
+    var freshVoices = window.speechSynthesis.getVoices();
+    var sel = document.getElementById('ttsVoiceSelect');
+    var selIdx = sel ? parseInt(sel.value) : NaN;
+    var freshVoice = null;
+    if (!isNaN(selIdx) && freshVoices[selIdx]) freshVoice = freshVoices[selIdx];
+    if (!freshVoice) {
+      var savedName = localStorage.getItem('tts_voice');
+      if (savedName) freshVoice = freshVoices.find(function(v) { return v.name === savedName; }) || null;
+    }
+    if (!freshVoice) freshVoice = freshVoices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; }) || null;
+    if (freshVoice) u.voice = freshVoice; else u.lang = 'en-US';
+
+    u.rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
+    u.pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
+    u.volume = parseFloat(document.getElementById('ttsVolume').value);
+    if (isNaN(u.volume)) u.volume = 1;
+
     u.onend   = function() { speakChunk(i + 1); };
     u.onerror = function() { ttsResetUI(); };
     window.speechSynthesis.speak(u);
