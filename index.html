@@ -446,10 +446,20 @@ function checkPin() {
         updateDots();
       });
   } else {
-    console.log('WRONG PIN');
+    console.log('WRONG PIN DETECTED');
     document.getElementById('pinError').textContent = 'Incorrect PIN — Try again';
     pinLocked = true;
     var dots = document.getElementById('pinDots');
+    // RED BACKGROUND TEST — confirms wrong PIN branch is firing
+    dots.style.backgroundColor = 'red';
+    dots.style.borderRadius = '8px';
+    dots.style.padding = '8px';
+    setTimeout(function() {
+      dots.style.backgroundColor = '';
+      dots.style.borderRadius = '';
+      dots.style.padding = '';
+    }, 1000);
+    // shake
     dots.classList.remove('pin-shake');
     void dots.offsetWidth;
     dots.classList.add('pin-shake');
