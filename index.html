@@ -861,7 +861,7 @@ function resetForm() {
 // iOS 15+ bug: speechSynthesis stops after ~15s — keepalive timer workaround
 // =============================================
 var ttsVoices = [];
-var ttsKeepalive = null;
+var ttsActive = false;
 
 function ttsGetVoices() {
   if (!window.speechSynthesis) return;
@@ -932,51 +932,61 @@ function ttsToggleSettings() {
   if (opening) { ttsPopulateVoices(); ttsLoadSettings(); }
 }
 
+function ttsChunkText(text) {
+  var sentences = text.match(/[^.!?]+[.!?]+[\s]*/g) || [text];
+  var chunks = [];
+  var cur = '';
+  sentences.forEach(function(s) {
+    if (cur.length + s.length > 200 && cur.length > 0) {
+      chunks.push(cur.trim());
+      cur = s;
+    } else {
+      cur += s;
+    }
+  });
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks.length > 0 ? chunks : [text];
+}
+
 function ttsStart() {
   window.speechSynthesis.cancel();
+  ttsActive = true;
 
   var el = document.getElementById('resultsBody');
-  var text = (el ? (el.innerText || el.textContent || '') : '').trim();
+  var text = (el ? el.innerText || el.textContent || '' : '').trim();
   if (!text) return;
 
   var voices = window.speechSynthesis.getVoices();
-  var u = new SpeechSynthesisUtterance(text);
-
   var savedName = localStorage.getItem('tts_voice');
   var voice = null;
   if (savedName) voice = voices.find(function(v) { return v.name === savedName; }) || null;
   if (!voice)    voice = voices.find(function(v) { return v.lang && v.lang.indexOf('en-US') >= 0; }) || null;
-  if (voice) u.voice = voice;
-  else u.lang = 'en-US';
 
-  u.rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
-  u.pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
-  u.volume = parseFloat(document.getElementById('ttsVolume').value);
-  if (isNaN(u.volume)) u.volume = 1;
+  var rate   = parseFloat(document.getElementById('ttsRate').value)   || 1;
+  var pitch  = parseFloat(document.getElementById('ttsPitch').value)  || 1;
+  var volume = parseFloat(document.getElementById('ttsVolume').value);
+  if (isNaN(volume)) volume = 1;
 
-  u.onend   = function() { if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; } ttsResetUI(); };
-  u.onerror = function() { if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; } ttsResetUI(); };
+  var chunks = ttsChunkText(text);
 
-  window.speechSynthesis.speak(u);
+  function speakChunk(i) {
+    if (!ttsActive || i >= chunks.length) { ttsResetUI(); return; }
+    var u = new SpeechSynthesisUtterance(chunks[i]);
+    if (voice) u.voice = voice; else u.lang = 'en-US';
+    u.rate = rate; u.pitch = pitch; u.volume = volume;
+    u.onend   = function() { speakChunk(i + 1); };
+    u.onerror = function() { ttsResetUI(); };
+    window.speechSynthesis.speak(u);
+  }
 
-  if (ttsKeepalive) clearInterval(ttsKeepalive);
-  ttsKeepalive = setInterval(function() {
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.pause();
-      window.speechSynthesis.resume();
-    } else {
-      clearInterval(ttsKeepalive);
-      ttsKeepalive = null;
-    }
-  }, 10000);
-
+  speakChunk(0); // first chunk spoken synchronously in click handler
   document.getElementById('ttsReadBtn').style.display = 'none';
   document.getElementById('ttsStopBtn').style.display = '';
 }
 
 function ttsStop() {
+  ttsActive = false;
   if (window.speechSynthesis) window.speechSynthesis.cancel();
-  if (ttsKeepalive) { clearInterval(ttsKeepalive); ttsKeepalive = null; }
   ttsResetUI();
 }
 
