@@ -58,9 +58,9 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .pin-del{background:transparent;border:none;color:var(–gold);font-size:1.3rem;cursor:pointer;padding:18px;touch-action:manipulation;}
 .pin-error{color:var(–red);font-size:11px;letter-spacing:1px;margin-top:10px;min-height:16px;}
 .pin-back-btn{background:transparent;border:none;color:var(–dim);font-size:11px;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:‘Montserrat’,sans-serif;}
-@-webkit-keyframes shake{0%,100%{-webkit-transform:translateX(0);transform:translateX(0)}15%{-webkit-transform:translateX(-10px);transform:translateX(-10px)}30%{-webkit-transform:translateX(10px);transform:translateX(10px)}45%{-webkit-transform:translateX(-8px);transform:translateX(-8px)}60%{-webkit-transform:translateX(8px);transform:translateX(8px)}75%{-webkit-transform:translateX(-5px);transform:translateX(-5px)}90%{-webkit-transform:translateX(5px);transform:translateX(5px)}}
-@keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-10px)}30%{transform:translateX(10px)}45%{transform:translateX(-8px)}60%{transform:translateX(8px)}75%{transform:translateX(-5px)}90%{transform:translateX(5px)}}
-.pin-dots{display:flex;gap:14px;margin-bottom:24px;will-change:transform;}
+@keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-8px)}20%,40%,60%,80%{transform:translateX(8px)}}
+.pin-shake{animation:shake 0.6s linear !important}
+.pin-dots{display:flex;gap:14px;margin-bottom:24px;}
 
 /* APP SCREEN */
 #appScreen{display:none;}
@@ -446,21 +446,19 @@ function checkPin() {
         updateDots();
       });
   } else {
-    console.log('[PIN] Wrong PIN entered — triggering shake animation');
+    console.log('WRONG PIN');
     document.getElementById('pinError').textContent = 'Incorrect PIN — Try again';
-    pinEntry = '';
-    updateDots();
     pinLocked = true;
     var dots = document.getElementById('pinDots');
-    dots.style.animation = 'none';
+    dots.classList.remove('pin-shake');
     void dots.offsetWidth;
-    dots.style.animation = 'shake 0.5s ease both';
+    dots.classList.add('pin-shake');
     setTimeout(function() {
-      dots.style.animation = 'none';
+      dots.classList.remove('pin-shake');
       pinEntry = '';
       updateDots();
       pinLocked = false;
-    }, 520);
+    }, 600);
   }
 }
 
