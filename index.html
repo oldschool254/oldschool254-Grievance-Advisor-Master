@@ -157,6 +157,7 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
 
 /* TTS READ ALOUD */
 .tts-row{display:flex;gap:10px;margin:14px 0 10px 0;flex-wrap:wrap;}
+.followup-tts-row{display:flex;gap:8px;margin:6px 0 12px 0;}
 .btn-tts-read{flex:1;padding:11px 8px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#0a1628;background-color:#0a1628;border:2px solid #c9a84c;color:#c9a84c;-webkit-text-fill-color:#c9a84c;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;touch-action:manipulation;}
 .btn-tts-read:active{background:#c9a84c !important;background-color:#c9a84c !important;color:#0a1628 !important;-webkit-text-fill-color:#0a1628 !important;}
 .btn-tts-stop{flex:1;padding:11px 8px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1.5px;cursor:pointer;background:#c9a84c;background-color:#c9a84c;border:2px solid #c9a84c;color:#0a1628;-webkit-text-fill-color:#0a1628;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;touch-action:manipulation;}
@@ -753,6 +754,22 @@ Add these as additional bold section headers ONLY when they apply to the specifi
     aiBubble.className = 'chat-bubble ai';
     aiBubble.innerHTML = answer.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
     history.appendChild(aiBubble);
+    var fuTtsRow = document.createElement('div');
+    fuTtsRow.className = 'followup-tts-row';
+    var fuReadBtn = document.createElement('button');
+    fuReadBtn.className = 'btn-tts-read';
+    fuReadBtn.innerHTML = '&#128266; READ ALOUD';
+    var fuStopBtn = document.createElement('button');
+    fuStopBtn.className = 'btn-tts-stop';
+    fuStopBtn.innerHTML = '&#9209; STOP';
+    fuStopBtn.style.display = 'none';
+    fuReadBtn.onclick = (function(bubble, rb, sb) {
+      return function() { ttsStartWithText((bubble.innerText || bubble.textContent || '').trim(), rb, sb); };
+    })(aiBubble, fuReadBtn, fuStopBtn);
+    fuStopBtn.onclick = function() { ttsStop(); };
+    fuTtsRow.appendChild(fuReadBtn);
+    fuTtsRow.appendChild(fuStopBtn);
+    history.appendChild(fuTtsRow);
     aiBubble.scrollIntoView({behavior:'smooth',block:'end'});
   } catch(err) {
     var eb = document.createElement('div'); eb.className='chat-bubble ai'; eb.textContent='Error: '+err.message; history.appendChild(eb);
@@ -868,6 +885,8 @@ function resetForm() {
 // =============================================
 var ttsVoices = [];
 var ttsActive = false;
+var ttsReadBtnActive = null;
+var ttsStopBtnActive = null;
 var ttsMobile  = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var ttsIOS     = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 var ttsAndroid = /Android/i.test(navigator.userAgent);
@@ -1016,6 +1035,12 @@ function ttsChunkText(text) {
 }
 
 function ttsStart() {
+  var el = document.getElementById('resultsBody');
+  var text = (el ? el.innerText || el.textContent || '' : '').trim();
+  ttsStartWithText(text, document.getElementById('ttsReadBtn'), document.getElementById('ttsStopBtn'));
+}
+
+function ttsStartWithText(text, readBtn, stopBtn) {
   var allVoices = window.speechSynthesis.getVoices();
   var davidVoice = allVoices.find(function(v){ return v.name.indexOf('David') !== -1; });
   var markVoice  = allVoices.find(function(v){ return v.name.indexOf('Mark')  !== -1; });
@@ -1023,11 +1048,10 @@ function ttsStart() {
 
   window.speechSynthesis.cancel();
   ttsActive = true;
+  ttsReadBtnActive = readBtn;
+  ttsStopBtnActive = stopBtn;
 
-  var el = document.getElementById('resultsBody');
-  var text = (el ? el.innerText || el.textContent || '' : '').trim();
   if (!text) return;
-
   var chunks = ttsChunkText(text);
 
   function speakChunk(i) {
@@ -1051,9 +1075,9 @@ function ttsStart() {
     window.speechSynthesis.speak(u);
   }
 
-  speakChunk(0); // first chunk spoken synchronously in click handler
-  document.getElementById('ttsReadBtn').style.display = 'none';
-  document.getElementById('ttsStopBtn').style.display = '';
+  speakChunk(0);
+  if (readBtn) readBtn.style.display = 'none';
+  if (stopBtn) stopBtn.style.display = '';
 }
 
 function ttsStop() {
@@ -1063,6 +1087,8 @@ function ttsStop() {
 }
 
 function ttsResetUI() {
+  if (ttsReadBtnActive) { ttsReadBtnActive.style.display = ''; ttsReadBtnActive = null; }
+  if (ttsStopBtnActive) { ttsStopBtnActive.style.display = 'none'; ttsStopBtnActive = null; }
   var r = document.getElementById('ttsReadBtn');
   var s = document.getElementById('ttsStopBtn');
   if (r) r.style.display = '';
