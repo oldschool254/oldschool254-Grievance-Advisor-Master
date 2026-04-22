@@ -544,6 +544,19 @@ function hideError() {
   document.getElementById('errorMsg').classList.remove('show');
 }
 
+async function gptFetch(url, headers, bodyStr, statusEl) {
+  var res = await fetch(url, {method:'POST', headers:headers, body:bodyStr});
+  var data = await res.json();
+  if (data.error && /rate.?limit|exceeded/i.test(data.error.message || '')) {
+    if (statusEl) statusEl.textContent = 'High demand — please hold one moment…';
+    await new Promise(function(r){ setTimeout(r, 20000); });
+    res = await fetch(url, {method:'POST', headers:headers, body:bodyStr});
+    data = await res.json();
+    if (data.error) data._rateLimited = /rate.?limit|exceeded/i.test(data.error.message || '');
+  }
+  return data;
+}
+
 async function analyzeGrievance() {
   var grievance = document.getElementById('grievanceInput').value.trim();
   if (!grievance || grievance.length < 20) { showError('Please describe your grievance in more detail.'); return; }
@@ -558,14 +571,12 @@ async function analyzeGrievance() {
   var mi = 0;
   var iv = setInterval(function(){ mi=(mi+1)%msgs.length; var el=document.getElementById('loadingSteps'); if(el) el.textContent=msgs[mi]; }, 2500);
 
-  try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + atob('c2stcHJvai1FMjk5SFdCMGJpRktOeXVUN0NMZHVObzJ3VUplWUItMVZldlh1WFhsb2RBNWMtclhsanc3V09oMENhRHNXZlktVWlUb0x3SFo5X1QzQmxia0ZKVUViNmMxYm5qaWZIWXFBQjN5b0dWblJ3OU8wMHpxSXZhTTR0NHFSTjVoQUxIZ2w4c2Z3eUpoaER1VFNGUHpsTlhFdFlqUUpzQUE=') },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        max_tokens: 4000,
-        messages: [
+  var _aUrl = 'https://api.openai.com/v1/chat/completions';
+  var _aHdr = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + atob('c2stcHJvai1FMjk5SFdCMGJpRktOeXVUN0NMZHVObzJ3VUplWUItMVZldlh1WFhsb2RBNWMtclhsanc3V09oMENhRHNXZlktVWlUb0x3SFo5X1QzQmxia0ZKVUViNmMxYm5qaWZIWXFBQjN5b0dWblJ3OU8wMHpxSXZhTTR0NHFSTjVoQUxIZ2w4c2Z3eUpoaER1VFNGUHpsTlhFdFlqUUpzQUE=') };
+  var _aBody = JSON.stringify({
+    model: 'gpt-4o',
+    max_tokens: 4000,
+    messages: [
           { role: 'system', content: `You are the most aggressive, experienced union arbitration advocate in the country, with 35 years representing IUOE Operating Engineers at NASA Johnson Space Center in Houston, Texas. You have won hundreds of grievances and arbitration cases. You know every trick management uses, every precedent that favors unions, and exactly how to build an airtight case.
 
 Your ONLY job is to help this union member WIN. You fight for workers. You are on their side completely.
@@ -641,10 +652,10 @@ Add these as additional bold section headers ONLY when they apply to the specifi
 **YOUR RETALIATION PROTECTIONS — KNOW THESE BEFORE YOU MEET WITH YOUR STEWARD**` + '\n\nFULL VERBATIM CONTRACT:\n' + currentContract.text },
           { role: 'user', content: grievance }
         ]
-      })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+  });
+  try {
+    var data = await gptFetch(_aUrl, _aHdr, _aBody, document.getElementById('loadingSteps'));
+    if (data.error) throw new Error(data._rateLimited ? '__RATE_LIMIT__' : data.error.message);
     var text = data.choices[0].message.content;
     var formatted = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
     document.getElementById('resultsBody').innerHTML = formatted;
@@ -653,7 +664,7 @@ Add these as additional bold section headers ONLY when they apply to the specifi
     document.getElementById('resultsBox').scrollIntoView({behavior:'smooth',block:'start'});
     document.getElementById('buildFormBtn').style.display = 'block';
   } catch(err) {
-    showError('Error: ' + err.message + ' — Please try again.');
+    showError(err.message === '__RATE_LIMIT__' ? 'Our AI advisor is in high demand right now. Please wait one moment and try again.' : 'Error: ' + err.message + ' — Please try again.');
   } finally {
     clearInterval(iv);
     document.getElementById('loadingBar').classList.remove('show');
@@ -764,13 +775,10 @@ Add these as additional bold section headers ONLY when they apply to the specifi
 **OSHA REGION 6 — WHAT TO DOCUMENT FOR YOUR STEWARD**
 **YOUR RETALIATION PROTECTIONS — KNOW THESE BEFORE YOU MEET WITH YOUR STEWARD**` + '\n\nFULL VERBATIM CONTRACT:\n' + currentContract.text}];
     for (var i = 0; i < conversationHistory.length; i++) messages.push(conversationHistory[i]);
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + atob('c2stcHJvai1FMjk5SFdCMGJpRktOeXVUN0NMZHVObzJ3VUplWUItMVZldlh1WFhsb2RBNWMtclhsanc3V09oMENhRHNXZlktVWlUb0x3SFo5X1QzQmxia0ZKVUViNmMxYm5qaWZIWXFBQjN5b0dWblJ3OU8wMHpxSXZhTTR0NHFSTjVoQUxIZ2w4c2Z3eUpoaER1VFNGUHpsTlhFdFlqUUpzQUE=') },
-      body: JSON.stringify({ model: 'gpt-4o', max_tokens: 1500, messages: messages })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    var _fUrl = 'https://api.openai.com/v1/chat/completions';
+    var _fHdr = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + atob('c2stcHJvai1FMjk5SFdCMGJpRktOeXVUN0NMZHVObzJ3VUplWUItMVZldlh1WFhsb2RBNWMtclhsanc3V09oMENhRHNXZlktVWlUb0x3SFo5X1QzQmxia0ZKVUViNmMxYm5qaWZIWXFBQjN5b0dWblJ3OU8wMHpxSXZhTTR0NHFSTjVoQUxIZ2w4c2Z3eUpoaER1VFNGUHpsTlhFdFlqUUpzQUE=') };
+    var data = await gptFetch(_fUrl, _fHdr, JSON.stringify({ model: 'gpt-4o', max_tokens: 1500, messages: messages }), spinner.querySelector('.followup-spinner-text'));
+    if (data.error) throw new Error(data._rateLimited ? '__RATE_LIMIT__' : data.error.message);
     var answer = data.choices[0].message.content;
     conversationHistory.push({role:'assistant', content: answer});
     var aiBubble = document.createElement('div');
@@ -795,7 +803,8 @@ Add these as additional bold section headers ONLY when they apply to the specifi
     history.appendChild(fuTtsRow);
     aiBubble.scrollIntoView({behavior:'smooth',block:'end'});
   } catch(err) {
-    var eb = document.createElement('div'); eb.className='chat-bubble ai'; eb.textContent='Error: '+err.message; history.appendChild(eb);
+    var ebTxt = err.message === '__RATE_LIMIT__' ? 'Our AI advisor is in high demand right now. Please wait one moment and try again.' : 'Error: ' + err.message;
+    var eb = document.createElement('div'); eb.className='chat-bubble ai'; eb.textContent=ebTxt; history.appendChild(eb);
   } finally { spinner.classList.remove('show'); btn.disabled = false; }
 }
 
