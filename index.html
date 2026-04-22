@@ -422,6 +422,7 @@ var selectedKey = null;
 var currentContract = null;
 var pinEntry = '';
 var pinLocked = false;
+var pinLastPress = 0;
 var conversationHistory = [];
 
 // =============================================
@@ -464,6 +465,9 @@ function updateDots() {
 }
 
 function pinPress(num) {
+  var now = Date.now();
+  if (now - pinLastPress < 100) return;
+  pinLastPress = now;
   if (pinEntry.length >= 4 || pinLocked) return;
   playDTMF(num);
   pinEntry += num;
@@ -477,6 +481,7 @@ function pinDel() {
 }
 
 function checkPin() {
+  if (pinEntry.length !== 4) return;
   var contract = CONTRACTS[selectedKey];
   var MASTER_PIN = ['2','1','2','0'].join('');
   // Master PIN 2120 unlocks ANY contract — Business Manager access only
