@@ -609,7 +609,13 @@ UPGRADE 14 — FMLA — FAMILY AND MEDICAL LEAVE ACT:
 When a member needs medical leave for their own serious health condition, a family member's condition, or childbirth, they are entitled to up to 12 weeks of unpaid job-protected leave under the Family and Medical Leave Act. As a federal contractor with 50+ employees, Amentum is fully covered by FMLA. Advise the member to: (1) submit written FMLA notice immediately, (2) never let management deny or discourage FMLA leave, (3) document all communications about the leave request, and (4) know their position must be held or an equivalent offered upon return. Any discipline, termination, or retaliation for taking FMLA leave is a federal violation. File simultaneously with the grievance procedure AND the U.S. Department of Labor Wage and Hour Division if FMLA rights are violated.
 
 UPGRADE 15 — GRIEVANCE FORM BUILDER:
-At the end of every analysis, generate a complete pre-filled grievance form ready for the Steward to submit. Label it clearly as "GRIEVANCE FORM — READY TO SUBMIT" and include: (1) Date of violation, (2) Specific contract articles violated with exact verbatim language, (3) Clear factual statement of the grievance, (4) The remedy requested including back pay, correction of records, or cease and desist order, (5) Grievance filing deadline per the contract, (6) Steward name and signature line. This ensures the Steward has everything needed to file immediately after the analysis.
+At the end of every analysis, generate a complete pre-filled grievance form ready for the Steward to submit. Label it clearly as "GRIEVANCE FORM — READY TO SUBMIT" and include these fields on separate lines using EXACTLY these labels:
+Date of Violation: [date]
+Articles Violated: [specific articles with verbatim language]
+STATEMENT OF GRIEVANCE: [Write a complete factual statement as one full sentence starting with a capital letter — NEVER start with a lowercase letter or mid-sentence]
+REMEDY REQUESTED: [Write the complete remedy as one full sentence starting with a capital letter — be specific, include back pay, correction of records, or cease and desist as applicable — NEVER start with a lowercase letter or mid-sentence]
+Filing Deadline: [deadline per contract]
+This ensures the Steward has everything needed to file immediately after the analysis.
 
 CRITICAL — STEWARD AND BUSINESS MANAGER PROTOCOL:
 The Union Steward and Business Manager handle ALL official filings on behalf of the member. Your role is to EDUCATE and PREPARE the member so they can have the most informed conversation possible with their Steward. Never tell the member to file anything themselves. Always frame filings as actions their Steward or Business Manager will take on their behalf.
@@ -727,7 +733,13 @@ UPGRADE 14 — FMLA — FAMILY AND MEDICAL LEAVE ACT:
 When a member needs medical leave for their own serious health condition, a family member's condition, or childbirth, they are entitled to up to 12 weeks of unpaid job-protected leave under the Family and Medical Leave Act. As a federal contractor with 50+ employees, Amentum is fully covered by FMLA. Advise the member to: (1) submit written FMLA notice immediately, (2) never let management deny or discourage FMLA leave, (3) document all communications about the leave request, and (4) know their position must be held or an equivalent offered upon return. Any discipline, termination, or retaliation for taking FMLA leave is a federal violation. File simultaneously with the grievance procedure AND the U.S. Department of Labor Wage and Hour Division if FMLA rights are violated.
 
 UPGRADE 15 — GRIEVANCE FORM BUILDER:
-At the end of every analysis, generate a complete pre-filled grievance form ready for the Steward to submit. Label it clearly as "GRIEVANCE FORM — READY TO SUBMIT" and include: (1) Date of violation, (2) Specific contract articles violated with exact verbatim language, (3) Clear factual statement of the grievance, (4) The remedy requested including back pay, correction of records, or cease and desist order, (5) Grievance filing deadline per the contract, (6) Steward name and signature line. This ensures the Steward has everything needed to file immediately after the analysis.
+At the end of every analysis, generate a complete pre-filled grievance form ready for the Steward to submit. Label it clearly as "GRIEVANCE FORM — READY TO SUBMIT" and include these fields on separate lines using EXACTLY these labels:
+Date of Violation: [date]
+Articles Violated: [specific articles with verbatim language]
+STATEMENT OF GRIEVANCE: [Write a complete factual statement as one full sentence starting with a capital letter — NEVER start with a lowercase letter or mid-sentence]
+REMEDY REQUESTED: [Write the complete remedy as one full sentence starting with a capital letter — be specific, include back pay, correction of records, or cease and desist as applicable — NEVER start with a lowercase letter or mid-sentence]
+Filing Deadline: [deadline per contract]
+This ensures the Steward has everything needed to file immediately after the analysis.
 
 CRITICAL — STEWARD AND BUSINESS MANAGER PROTOCOL:
 The Union Steward and Business Manager handle ALL official filings on behalf of the member. Your role is to EDUCATE and PREPARE the member so they can have the most informed conversation possible with their Steward. Never tell the member to file anything themselves. Always frame filings as actions their Steward or Business Manager will take on their behalf.
@@ -803,15 +815,19 @@ function showGrievanceForm() {
     var uniqueArticles = [...new Set(articleMatches.map(function(a){ return a.trim(); }))];
     document.getElementById('gfArticles').value = uniqueArticles.join(', ');
   }
-  var summaryMatch = analysis.match(/(?:^|\n)SUMMARY OF (?:THE )?VIOLATION[^\n]*\n+([\s\S]*?)(?=\n[A-Z]{2,}|$)/i);
-  if (summaryMatch && summaryMatch[1]) {
-    var stmt = summaryMatch[1].trim();
+  // Statement of Grievance — prefer exact label from form, fall back to analysis section
+  var stmtMatch = analysis.match(/(?:^|\n)STATEMENT OF GRIEVANCE:\s*([^\n]{10,})/i);
+  if (!stmtMatch) stmtMatch = analysis.match(/(?:^|\n)SUMMARY OF (?:THE )?VIOLATION[^\n]*\n+([\s\S]*?)(?=\n[A-Z]{2,}|$)/i);
+  if (stmtMatch && stmtMatch[1]) {
+    var stmt = stmtMatch[1].trim();
     if (/^[a-z]/.test(stmt)) stmt = stmt[0].toUpperCase() + stmt.slice(1);
     document.getElementById('gfStatement').value = stmt.substring(0, 600);
   }
   var deadlineMatch = analysis.match(/within\s+\d+\s+(?:calendar\s+)?days?[^.\n]*/i);
   if (deadlineMatch) document.getElementById('gfDeadline').value = deadlineMatch[0].trim();
-  var remedyMatch = analysis.match(/(?:^|\n)REMEDY[^\n]*\n+([\s\S]*?)(?=\n[A-Z]{2,}|$)/i);
+  // Remedy Requested — prefer exact label from form, fall back to section heading
+  var remedyMatch = analysis.match(/(?:^|\n)REMEDY REQUESTED:\s*([^\n]{10,})/i);
+  if (!remedyMatch) remedyMatch = analysis.match(/(?:^|\n)REMEDY[^\n]*\n+([\s\S]*?)(?=\n[A-Z]{2,}|$)/i);
   if (!remedyMatch) remedyMatch = analysis.match(/(?:^|\n)REMEDY\b[^:\n]*:\s*([^\n]{5,})/i);
   if (remedyMatch && remedyMatch[1]) {
     var rem = remedyMatch[1].trim();
