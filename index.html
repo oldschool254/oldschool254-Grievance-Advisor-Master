@@ -46,9 +46,9 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 #pinScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;}
 .pin-employer-label{font-family:’Bebas Neue’,sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(–gold);margin-bottom:6px;margin-top:24px;text-align:center;}
 .pin-bulldog{width:140px;height:140px;border-radius:18px;margin-bottom:16px;}
-.pin-title{font-family:‘Bebas Neue’,sans-serif;font-size:2rem;letter-spacing:3px;color:var(–white);text-align:center;margin-bottom:2px;}
+.pin-title{font-family:’Bebas Neue’,sans-serif;font-size:2rem;letter-spacing:3px;color:var(–white);text-align:center;margin-bottom:1.5rem;}
 .pin-title span{color:var(–gold);}
-.pin-subtitle{font-size:0.925rem;letter-spacing:3px;color:var(–gold);text-align:center;margin-top:10px;margin-bottom:2rem;font-weight:600;}
+.pin-subtitle{font-size:0.925rem;letter-spacing:3px;color:var(–gold);text-align:center;margin-top:1rem;margin-bottom:0.75rem;font-weight:600;white-space:nowrap;}
 .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(–gold);background:transparent;transition:background 0.15s;}
 .pin-dot.filled{background:var(–gold);}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;}
@@ -60,7 +60,7 @@ background-repeat:no-repeat;background-position:right 16px center;padding-right:
 .pin-del{background:transparent;border:none;color:var(–gold);font-size:1.3rem;cursor:pointer;padding:18px;touch-action:manipulation;min-height:48px;user-select:none;-webkit-user-select:none;}
 .pin-error{color:var(–red);font-size:11px;letter-spacing:1px;margin-top:10px;min-height:16px;}
 .pin-back-btn{background:transparent;border:none;color:var(–dim);font-size:11px;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:‘Montserrat’,sans-serif;}
-.pin-dots{display:flex;gap:14px;margin-bottom:24px;position:relative;}
+.pin-dots{display:flex;gap:14px;margin-bottom:0;position:relative;}
 
 /* APP SCREEN */
 #appScreen{display:none;}
@@ -200,13 +200,13 @@ textarea{background:#ffffff !important;background-color:#ffffff !important;color
   <div class="pin-employer-label" id="pinEmployerLabel"></div>
   <img class="pin-bulldog" src="img/pin-bulldog.png" alt="IUOE Local 564">
   <div class="pin-title">GRIEVANCE-ARBITRATION <span>ADVISOR</span></div>
-  <div class="pin-subtitle">★ ENTER CONTRACT PIN TO ACCESS ★</div>
   <div class="pin-dots" id="pinDots">
     <div class="pin-dot" id="dot0"></div>
     <div class="pin-dot" id="dot1"></div>
     <div class="pin-dot" id="dot2"></div>
     <div class="pin-dot" id="dot3"></div>
   </div>
+  <div class="pin-subtitle">★ ENTER CONTRACT PIN TO ACCESS ★</div>
   <div class="pin-pad">
     <button class="pin-btn" onclick="pinPress('1')" ontouchstart="this.classList.add('active');playBeepOnTouch('1')" ontouchend="this.classList.remove('active');pinPress('1');event.preventDefault();" ontouchcancel="this.classList.remove('active')">1</button>
     <button class="pin-btn" onclick="pinPress('2')" ontouchstart="this.classList.add('active');playBeepOnTouch('2')" ontouchend="this.classList.remove('active');pinPress('2');event.preventDefault();" ontouchcancel="this.classList.remove('active')">2</button>
