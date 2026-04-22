@@ -803,12 +803,21 @@ function showGrievanceForm() {
     var uniqueArticles = [...new Set(articleMatches.map(function(a){ return a.trim(); }))];
     document.getElementById('gfArticles').value = uniqueArticles.join(', ');
   }
-  var summaryMatch = analysis.match(/SUMMARY OF (?:THE )?VIOLATION[:\s\n]+(.*?)(?=\n[A-Z]{2,}|$)/is);
-  if (summaryMatch && summaryMatch[1]) document.getElementById('gfStatement').value = summaryMatch[1].trim().substring(0,600);
+  var summaryMatch = analysis.match(/(?:^|\n)SUMMARY OF (?:THE )?VIOLATION[^\n]*\n+([\s\S]*?)(?=\n[A-Z]{2,}|$)/i);
+  if (summaryMatch && summaryMatch[1]) {
+    var stmt = summaryMatch[1].trim();
+    if (/^[a-z]/.test(stmt)) stmt = stmt[0].toUpperCase() + stmt.slice(1);
+    document.getElementById('gfStatement').value = stmt.substring(0, 600);
+  }
   var deadlineMatch = analysis.match(/within\s+\d+\s+(?:calendar\s+)?days?[^.\n]*/i);
   if (deadlineMatch) document.getElementById('gfDeadline').value = deadlineMatch[0].trim();
-  var remedyMatch = analysis.match(/REMEDY[:\s\n]+(.*?)(?=\n[A-Z]{2,}|$)/is);
-  if (remedyMatch && remedyMatch[1]) document.getElementById('gfRemedy').value = remedyMatch[1].trim().substring(0,400);
+  var remedyMatch = analysis.match(/(?:^|\n)REMEDY[^\n]*\n+([\s\S]*?)(?=\n[A-Z]{2,}|$)/i);
+  if (!remedyMatch) remedyMatch = analysis.match(/(?:^|\n)REMEDY\b[^:\n]*:\s*([^\n]{5,})/i);
+  if (remedyMatch && remedyMatch[1]) {
+    var rem = remedyMatch[1].trim();
+    if (/^[a-z]/.test(rem)) rem = rem[0].toUpperCase() + rem.slice(1);
+    document.getElementById('gfRemedy').value = rem.substring(0, 400);
+  }
   document.getElementById('grievanceFormSection').scrollIntoView({behavior:'smooth'});
 }
 
