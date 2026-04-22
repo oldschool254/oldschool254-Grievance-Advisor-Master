@@ -859,7 +859,7 @@ function sendGrievanceMail() {
     'REMEDY REQUESTED:\n' + remedy + '\n\n' +
     'FILING DEADLINE: ' + deadline + '\n\n' +
     'Filed by: ' + steward + '\nIUOE Local 564\n\n' +
-    'This grievance is filed pursuant to the Collective Bargaining Agreement between IUOE Local 564 and ' + currentContract.name + '.\n\nUnion Proud!'
+    'This grievance is filed pursuant to the Collective Bargaining Agreement between IUOE Local 564 and ' + currentContract.name + '.'
   );
   window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
 }
